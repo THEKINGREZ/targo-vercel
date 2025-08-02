@@ -1,0 +1,33 @@
+<!-- views/partials/_stats.ejs (Final Corrected Version) -->
+<div class="bg-zinc-800/50 backdrop-blur-sm rounded-2xl p-6 md:p-8">
+    <!-- FIX: Changed grid-cols-1 sm:grid-cols-3 to grid-cols-3 to force horizontal layout on all screens -->
+    <div class="grid grid-cols-3 gap-4 sm:gap-8 text-center">
+        
+        <!-- آمار مانگاها -->
+        <div class="flex flex-col items-center">
+            <div class="p-3 sm:p-4 bg-sky-500/10 rounded-full mb-3 border border-sky-500/20">
+                <svg class="w-7 h-7 sm:w-8 sm:h-8 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+            </div>
+            <p class="text-2xl sm:text-3xl font-bold text-white" id="stats-manga-count">0</p>
+            <p class="text-xs sm:text-sm text-zinc-400 mt-1">اثر</p>
+        </div>
+        
+        <!-- آمار چپترها -->
+        <div class="flex flex-col items-center">
+            <div class="p-3 sm:p-4 bg-green-500/10 rounded-full mb-3 border border-green-500/20">
+                <svg class="w-7 h-7 sm:w-8 sm:h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+            </div>
+            <p class="text-2xl sm:text-3xl font-bold text-white" id="stats-chapter-count">0</p>
+            <p class="text-xs sm:text-sm text-zinc-400 mt-1">چپتر</p>
+        </div>
+        
+        <!-- آمار تیم‌ها -->
+        <div class="flex flex-col items-center">
+            <div class="p-3 sm:p-4 bg-purple-500/10 rounded-full mb-3 border border-purple-500/20">
+                <svg class="w-7 h-7 sm:w-8 sm:h-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.08-1.283-.23-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.08-1.283.23-1.857m10.542 2.145A5 5 0 0018 16a4.5 4.5 0 00-4.5-4.5c-2.31 0-4.273 1.657-4.5-3.75m9 0a4.5 4.5 0 01-4.5 4.5c-2.31 0-4.273-1.657-4.5-3.75m4.5-4.5A3.5 3.5 0 0013.5 9.75M9 10.5A3.5 3.5 0 0012.5 7 3.5 3.5 0 009 10.5zm9 5.25c0 .621.504 1.125 1.125 1.125a1.125 1.125 0 001.125-1.125c0-.621-.504-1.125-1.125-1.125a1.125 1.125 0 00-1.125 1.125zM3.875 16.5c0 .621.504 1.125 1.125 1.125a1.125 1.125 0 001.125-1.125c0-.621-.504-1.125-1.125-1.125a1.125 1.125 0 00-1.125 1.125z"></path></svg>
+            </div>
+            <p class="text-2xl sm:text-3xl font-bold text-white" id="stats-channel-count">0</p>
+            <p class="text-xs sm:text-sm text-zinc-400 mt-1">تیم ترجمه</p>
+        </div>
+    </div>
+</div>

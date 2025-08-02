@@ -1,0 +1,90 @@
+<%- include('partials/header') %>
+
+<div class="container mx-auto px-2 sm:px-4 py-8">
+    <h1 class="text-3xl font-bold text-sky-400 mb-8 text-center">📢 لیست کانال‌ها</h1>
+
+    <% if (channels && channels.length > 0) { %>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <% channels.forEach(channel => { %>
+                <div class="bg-zinc-800 rounded-xl shadow-lg hover:shadow-sky-500/20 transition-all duration-300 ease-in-out transform hover:-translate-y-1.5 group flex flex-col h-full">
+                    
+                    <!-- بخش اصلی کارت شامل اطلاعات و توضیحات -->
+                    <div class="p-5 flex-grow">
+                        <div class="flex items-center mb-4">
+                            <img src="<%= channel.profile_image_url || 'https://placehold.co/128x128/3f3f46/a1a1aa?text=' + encodeURIComponent(channel.name.substring(0,1)) %>"
+                                 alt="[پروفایل کانال <%= channel.name %>]"
+                                 class="w-16 h-16 rounded-full object-cover border-2 border-zinc-700 group-hover:border-sky-500 transition-colors flex-shrink-0">
+                            <div class="mr-4 overflow-hidden">
+                                <h3 class="text-lg font-semibold text-zinc-100 group-hover:text-sky-400 transition-colors truncate" title="<%= channel.name %>">
+                                    <%= channel.name %>
+                                </h3>
+                                <% if (channel.telegram_handle) { %>
+                                    <p class="text-sm text-sky-400 group-hover:text-sky-300 transition-colors truncate">@<%= channel.telegram_handle %></p>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <% if (channel.bio && channel.bio.trim() !== '') { %>
+                            <p class="text-sm text-zinc-400 line-clamp-3 mb-4">
+                                <%= channel.bio %>
+                            </p>
+                        <% } else { %>
+                            <p class="text-sm text-zinc-500 italic mb-4">این کانال توضیحی ثبت نکرده است.</p>
+                        <% } %>
+
+                        <!-- پیش‌نمایش مانگاها -->
+                        <% if (channel.mangas && channel.mangas.length > 0) { %>
+                            <div>
+                                 <h4 class="text-xs font-bold uppercase text-zinc-500 mb-3">آخرین کارها</h4>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <% channel.mangas.forEach(manga => { %>
+                                        <a href="/manga/<%= manga.id %>" class="aspect-[2/3] w-full overflow-hidden rounded-md group/manga" title="<%= manga.title %>">
+                                            <img src="<%= manga.cover_image_url || 'https://placehold.co/100x150/27272a/e4e4e7?text=کاور' %>"
+                                                 alt="[کاور <%= manga.title %>]" class="w-full h-full object-cover group-hover/manga:scale-105 transition-transform duration-300">
+                                        </a>
+                                    <% }); %>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                    
+                    <!-- فوتر کارت -->
+                    <div class="bg-zinc-800/50 border-t border-zinc-700/60 p-4 flex justify-between items-center rounded-b-xl mt-auto">
+                        <div class="text-sm text-zinc-400">
+                            <span class="font-bold text-zinc-200"><%= channel.manga_count || 0 %></span>
+                            <span>مانگا</span>
+                        </div>
+                        <a href="/channel/<%= channel.id %>" class="px-4 py-2 bg-sky-500 text-white text-sm font-semibold rounded-lg hover:bg-sky-600 transition-colors">
+                            مشاهده کانال
+                        </a>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div class="text-center py-10">
+            <p class="text-zinc-400">هیچ کانالی برای نمایش یافت نشد.</p>
+        </div>
+    <% } %>
+
+    <!-- صفحه‌بندی -->
+    <% if (totalPages > 1) { %>
+        <div class="mt-8 flex justify-center items-center space-x-2 space-x-reverse">
+            <% if (currentPage > 1) { %>
+                <a href="/channels?p=<%= currentPage - 1 %>" class="px-4 py-2 bg-zinc-700 text-zinc-200 rounded-md hover:bg-zinc-600">&laquo; قبلی</a>
+            <% } %>
+            <% for (let i = 1; i <= totalPages; i++) { %>
+                <% if (i === currentPage) { %>
+                    <span class="px-4 py-2 bg-sky-500 text-white rounded-md"><%= i %></span>
+                <% } else { %>
+                    <a href="/channels?p=<%= i %>" class="px-4 py-2 bg-zinc-700 text-zinc-200 rounded-md hover:bg-zinc-600"><%= i %></a>
+                <% } %>
+            <% } %>
+             <% if (currentPage < totalPages) { %>
+                <a href="/channels?p=<%= currentPage + 1 %>" class="px-4 py-2 bg-zinc-700 text-zinc-200 rounded-md hover:bg-zinc-600">بعدی &raquo;</a>
+            <% } %>
+        </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>

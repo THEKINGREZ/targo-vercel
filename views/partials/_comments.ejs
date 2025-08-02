@@ -1,0 +1,493 @@
+<style>
+    .comment-content.hidden-by-spoiler {
+        display: none;
+    }
+    .spoiler-overlay {
+        background-color: #27272a; /* zinc-800 */
+        border-left: 4px solid #f59e0b; /* amber-500 */
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 120px;
+    }
+    .reply-form, .replies-container {
+        display: none;
+        animation: fadeIn 0.3s ease-out;
+    }
+    .reply-form.active, .replies-container.visible {
+        display: block;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .dropdown-menu {
+        transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+        transform-origin: top right;
+    }
+    .toast-notification {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s, bottom 0.3s;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .toast-notification.show {
+        opacity: 1;
+        bottom: 40px;
+    }
+    .toast-notification.success {
+        background-color: #10b981;
+    }
+    .toast-notification.error {
+        background-color: #ef4444;
+    }
+</style>
+
+<div id="comment-section">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-semibold text-sky-300">نظرات (<span id="comment-count">0</span>)</h2>
+        <div class="flex items-center gap-2">
+            <label for="comment-sort-select" class="text-sm text-zinc-400">مرتب‌سازی:</label>
+            <select id="comment-sort-select" class="bg-zinc-700 text-zinc-200 text-sm rounded-md border-zinc-600 focus:ring-sky-500 focus:border-sky-500">
+                <option value="newest">جدیدترین</option>
+                <option value="oldest">قدیمی‌ترین</option>
+                <option value="most_liked">محبوب‌ترین</option>
+            </select>
+        </div>
+    </div>
+
+    <% if (user) { %>
+        <div class="bg-zinc-900/50 p-4 rounded-lg mb-8">
+            <textarea id="new-comment-textarea" class="w-full bg-zinc-700 p-3 rounded-md text-zinc-100 focus:ring-2 focus:ring-sky-500 focus:outline-none" rows="3" placeholder="نظر خود را بنویسید..."></textarea>
+            <div class="flex justify-between items-center mt-3">
+                <label class="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
+                    <input type="checkbox" id="new-comment-spoiler" class="form-checkbox h-4 w-4 text-sky-500 bg-zinc-600 border-zinc-500 rounded">
+                    <span>حاوی اسپویلر</span>
+                </label>
+                <button id="submit-comment-btn" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-6 rounded-md transition-colors">ارسال</button>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="bg-zinc-900/50 p-4 rounded-lg mb-8 text-center">
+            <p class="text-zinc-300">برای ثبت نظر، لطفاً <a href="/auth?redirect=<%= encodeURIComponent(req.originalUrl) %>" class="text-sky-400 hover:underline">وارد شوید</a>.</p>
+        </div>
+    <% } %>
+
+    <div id="pinned-comments-container" class="space-y-4 mb-8"></div>
+    <div id="comments-container" class="space-y-4">
+        <div class="text-center py-8"><p class="text-zinc-500">در حال بارگذاری نظرات...</p></div>
+    </div>
+</div>
+
+<div id="confirmation-modal" class="fixed inset-0 bg-black/75 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-zinc-800 p-6 rounded-lg shadow-xl w-full max-w-sm text-center">
+        <h3 id="modal-title" class="text-lg font-bold text-white mb-4"></h3>
+        <p id="modal-text" class="text-zinc-300 mb-6"></p>
+        <div class="flex justify-center gap-4">
+            <button id="modal-cancel-btn" class="px-6 py-2 rounded-md bg-zinc-600 hover:bg-zinc-500 text-white font-semibold">لغو</button>
+            <button id="modal-confirm-btn" class="px-6 py-2 rounded-md font-semibold">تایید</button>
+        </div>
+    </div>
+</div>
+
+<div id="report-modal" class="fixed inset-0 bg-black/75 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-zinc-800 p-6 rounded-lg shadow-xl w-full max-w-sm">
+        <h3 class="text-lg font-bold text-white mb-4">گزارش نظر</h3>
+        <p class="text-zinc-300 mb-4 text-sm">لطفاً دلیل گزارش خود را (در صورت تمایل) بنویسید.</p>
+        <textarea id="report-reason-textarea" class="w-full bg-zinc-700 p-3 rounded-md text-zinc-100 focus:ring-2 focus:ring-sky-500 focus:outline-none" rows="3" placeholder="توضیحات (اختیاری)..."></textarea>
+        <div class="flex justify-end gap-4 mt-6">
+            <button id="modal-cancel-report-btn" class="px-6 py-2 rounded-md bg-zinc-600 hover:bg-zinc-500 text-white font-semibold">لغو</button>
+            <button id="modal-confirm-report-btn" class="px-6 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold">ارسال گزارش</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    if (!window.commentScriptLoaded) {
+        window.commentScriptLoaded = true;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const commentSection = document.getElementById('comment-section');
+            if (!commentSection) return;
+
+            const mangaId = <%= manga.id %>;
+            const currentUser = <%- JSON.stringify(user || null) %>;
+            
+            const commentsContainer = document.getElementById('comments-container');
+            const pinnedContainer = document.getElementById('pinned-comments-container');
+            const commentCountSpan = document.getElementById('comment-count');
+            const sortSelect = document.getElementById('comment-sort-select');
+            
+            const newCommentTextarea = document.getElementById('new-comment-textarea');
+            const newCommentSpoiler = document.getElementById('new-comment-spoiler');
+            const submitCommentBtn = document.getElementById('submit-comment-btn');
+            
+            const confirmationModal = document.getElementById('confirmation-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalText = document.getElementById('modal-text');
+            const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+            const modalCancelBtn = document.getElementById('modal-cancel-btn');
+            let confirmAction = null;
+
+            const reportModal = document.getElementById('report-modal');
+            const reportReasonTextarea = document.getElementById('report-reason-textarea');
+            const confirmReportBtn = document.getElementById('modal-confirm-report-btn');
+            const cancelReportBtn = document.getElementById('modal-cancel-report-btn');
+            let commentIdToReport = null;
+
+            function showToast(message, type = 'error') {
+                const toast = document.createElement('div');
+                toast.className = `toast-notification ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            function createCommentElement(comment, isReply = false) {
+                const element = document.createElement('div');
+                element.id = `comment-${comment.id}`;
+                element.className = `flex gap-3 ${isReply ? 'ml-4 sm:ml-8' : ''}`;
+
+                const userRole = comment.is_owner ? 'مالک' : (comment.is_admin ? 'ادمین' : 'کاربر');
+                const roleColor = comment.is_owner ? 'text-red-400' : (comment.is_admin ? 'text-yellow-400' : 'text-zinc-400');
+                const likeClass = comment.user_vote === 'like' ? 'text-sky-400' : 'text-zinc-400';
+                const dislikeClass = comment.user_vote === 'dislike' ? 'text-red-400' : 'text-zinc-400';
+
+                let adminActionsMenu = '';
+                if (currentUser && (currentUser.is_owner || currentUser.is_admin)) {
+                    adminActionsMenu = `
+                        <div class="border-t border-zinc-600 my-1"></div>
+                        <button class="pin-comment-btn block w-full text-right px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-600" data-comment-id="${comment.id}" data-pinned="${comment.is_pinned}">${comment.is_pinned ? 'حذف پین' : 'پین کردن'}</button>
+                        <button class="delete-comment-btn block w-full text-right px-4 py-2 text-sm text-red-400 hover:bg-zinc-600" data-comment-id="${comment.id}">حذف</button>
+                    `;
+                }
+
+                const spoilerContentClass = comment.is_spoiler ? 'hidden-by-spoiler' : 'visible';
+                const spoilerBlock = comment.is_spoiler ? `<div class="spoiler-overlay"><p class="font-bold text-yellow-400">این نظر حاوی اسپویلر است</p><p class="text-xs text-zinc-400 mt-1">برای نمایش، روی دکمه زیر کلیک کنید</p><button class="show-spoiler-btn text-white bg-yellow-600 hover:bg-yellow-700 text-sm font-semibold mt-3 py-1 px-4 rounded-md">نمایش نظر</button></div>` : '';
+                const showRepliesButton = comment.replies && comment.replies.length > 0 ? `<button class="replies-toggle text-xs font-semibold text-sky-400 hover:text-sky-300 mt-3" data-reply-count="${comment.replies.length}">نمایش ${comment.replies.length} پاسخ</button>` : '';
+                
+                const commentDiv = document.createElement('div');
+                commentDiv.className = "flex-grow";
+                commentDiv.innerHTML = `
+                    <div class="bg-zinc-900/50 rounded-lg p-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold text-white"></span>
+                                <span class="text-xs ${roleColor}">${userRole}</span>
+                            </div>
+                            <span class="text-xs text-zinc-500">${new Date(comment.created_at).toLocaleDateString('fa-IR')}</span>
+                        </div>
+                        ${spoilerBlock}
+                        <div class="comment-content ${spoilerContentClass} text-zinc-300 text-sm leading-relaxed"></div>
+                    </div>
+                    <div class="actions flex items-center justify-between mt-2 px-2">
+                        <div class="flex items-center gap-4 text-xs text-zinc-400">
+                            <button class="vote-btn flex items-center gap-1 hover:text-white ${likeClass}" data-vote-type="like" data-comment-id="${comment.id}"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.562 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"/></svg><span>${comment.likes}</span></button>
+                            <button class="vote-btn flex items-center gap-1 hover:text-white ${dislikeClass}" data-vote-type="dislike" data-comment-id="${comment.id}"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.106-1.79l-.05-.025A4 4 0 0011.057 2H5.642a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.438 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.2-2.4a4 4 0 00.8-2.4z"/></svg><span>${comment.dislikes}</span></button>
+                            <button class="reply-btn hover:text-white" data-comment-id="${comment.id}">پاسخ</button>
+                        </div>
+                        <div class="relative">
+                            <button class="options-menu-btn p-1 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-700">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
+                            </button>
+                            <div class="dropdown-menu absolute left-0 mt-2 w-40 bg-zinc-700 rounded-md shadow-lg z-10 hidden transform scale-95 opacity-0">
+                                <button class="report-btn block w-full text-right px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-600" data-comment-id="${comment.id}">گزارش</button>
+                                ${adminActionsMenu}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="reply-form-container mt-3"></div>
+                    ${showRepliesButton}
+                    <div class="replies-container space-y-4 mt-3"></div>
+                `;
+
+                // Securely set user-generated content
+                commentDiv.querySelector('.font-semibold.text-white').textContent = comment.app_username;
+                commentDiv.querySelector('.comment-content').textContent = comment.content;
+
+                const avatarImg = document.createElement('img');
+                avatarImg.src = comment.profile_image_url || 'https://placehold.co/48x48/27272a/9ca3af?text=' + comment.app_username.substring(0, 1).toUpperCase();
+                avatarImg.alt = "آواتار";
+                avatarImg.className = "w-10 h-10 rounded-full flex-shrink-0 mt-1";
+
+                element.appendChild(avatarImg);
+                element.appendChild(commentDiv);
+                
+                return element;
+            }
+            
+            function createReplyForm(parentId) {
+                const formContainer = document.createElement('div');
+                formContainer.className = 'reply-form active p-3 bg-zinc-800/50 rounded-md';
+                formContainer.innerHTML = `
+                    <textarea class="w-full bg-zinc-700 p-2 rounded-md text-zinc-100 text-sm focus:ring-1 focus:ring-sky-500 focus:outline-none" rows="2" placeholder="پاسخ خود را بنویسید..."></textarea>
+                    <div class="flex justify-between items-center mt-2">
+                        <label class="flex items-center gap-2 text-xs text-zinc-400 cursor-pointer"><input type="checkbox" class="form-checkbox h-4 w-4 text-sky-500 bg-zinc-600 border-zinc-500 rounded"><span>اسپویلر</span></label>
+                        <div>
+                            <button class="cancel-reply-btn text-xs text-zinc-400 hover:text-white px-3 py-1 rounded-md">لغو</button>
+                            <button class="submit-reply-btn bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold py-1 px-4 rounded-md" data-parent-id="${parentId}">ارسال پاسخ</button>
+                        </div>
+                    </div>
+                `;
+                return formContainer;
+            }
+
+            function renderComments(comments, container, isReply = false) {
+                container.innerHTML = '';
+                comments.forEach(comment => {
+                    const commentElement = createCommentElement(comment, isReply);
+                    container.appendChild(commentElement);
+                    if (comment.replies && comment.replies.length > 0) {
+                        const repliesContainer = commentElement.querySelector('.replies-container');
+                        renderComments(comment.replies, repliesContainer, true);
+                    }
+                });
+            }
+
+            async function fetchAndRenderComments() {
+                const sortBy = sortSelect.value;
+                try {
+                    const response = await fetch(`/api/manga/${mangaId}/comments?sort_by=${sortBy}`);
+                    const data = await response.json();
+                    if (data.success) {
+                        commentsContainer.innerHTML = '';
+                        pinnedContainer.innerHTML = '';
+                        const pinned = data.comments.filter(c => c.is_pinned);
+                        const regular = data.comments.filter(c => !c.is_pinned);
+                        
+                        let totalComments = 0;
+                        const countComments = (comments) => {
+                            for (const comment of comments) {
+                                totalComments++;
+                                if (comment.replies) countComments(comment.replies);
+                            }
+                        };
+                        countComments(data.comments);
+                        commentCountSpan.textContent = totalComments;
+
+                        if (pinned.length > 0) {
+                            pinnedContainer.innerHTML = '<h3 class="text-sm font-semibold text-amber-400 mb-2">نظرات پین شده</h3>';
+                            renderComments(pinned, pinnedContainer);
+                        }
+                        if (regular.length > 0) {
+                            renderComments(regular, commentsContainer);
+                        } else if (pinned.length === 0) {
+                             commentsContainer.innerHTML = '<div class="text-center py-8"><p class="text-zinc-500">هنوز نظری ثبت نشده است.</p></div>';
+                        }
+                    } else {
+                        throw new Error('Failed to fetch comments');
+                    }
+                } catch (error) {
+                    console.error("Failed to load comments:", error);
+                    commentsContainer.innerHTML = '<p class="text-center text-red-400">خطا در بارگذاری نظرات.</p>';
+                }
+            }
+            
+            function showConfirmationModal(title, text, confirmClass, onConfirm) {
+                modalTitle.textContent = title;
+                modalText.textContent = text;
+                modalConfirmBtn.className = `px-6 py-2 rounded-md font-semibold ${confirmClass}`;
+                confirmAction = onConfirm;
+                confirmationModal.classList.remove('hidden');
+            }
+            
+            modalCancelBtn.addEventListener('click', () => confirmationModal.classList.add('hidden'));
+            modalConfirmBtn.addEventListener('click', () => {
+                confirmationModal.classList.add('hidden');
+                if (typeof confirmAction === 'function') {
+                    confirmAction();
+                }
+            });
+
+            commentSection.addEventListener('click', async (e) => {
+                const target = e.target;
+                const button = target.closest('button');
+                if (!button) return;
+                
+                if (button.classList.contains('show-spoiler-btn')) {
+                    const commentElement = button.closest('.flex-grow');
+                    button.parentElement.style.display = 'none';
+                    commentElement.querySelector('.comment-content').classList.remove('hidden-by-spoiler');
+                    return;
+                }
+                
+                if (button.classList.contains('replies-toggle')) {
+                    const repliesContainer = button.parentElement.querySelector('.replies-container');
+                    const isHidden = !repliesContainer.classList.contains('visible');
+                    repliesContainer.classList.toggle('visible');
+                    button.textContent = isHidden ? `بستن پاسخ‌ها` : `نمایش ${button.dataset.replyCount} پاسخ`;
+                    return;
+                }
+                
+                if (button.id === 'submit-comment-btn') {
+                    if (!currentUser) return showToast('برای ثبت نظر باید وارد شوید.');
+                    const content = newCommentTextarea.value.trim();
+                    if (!content) return;
+                    button.disabled = true; button.textContent = 'در حال ارسال...';
+                    try {
+                        const response = await fetch('/api/comments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ manga_id: mangaId, content, is_spoiler: newCommentSpoiler.checked }) });
+                        const result = await response.json();
+                        if (!result.success) throw new Error(result.message || "Server Error");
+                        
+                        newCommentTextarea.value = ''; newCommentSpoiler.checked = false;
+                        const newCommentElement = createCommentElement(result.comment);
+                        if(commentsContainer.querySelector('.text-center')) commentsContainer.innerHTML = '';
+                        commentsContainer.prepend(newCommentElement);
+                        commentCountSpan.textContent = parseInt(commentCountSpan.textContent) + 1;
+                        showToast('نظر شما با موفقیت ثبت شد.', 'success');
+                    } catch (error) {
+                        showToast('خطا در ارسال نظر.');
+                    } finally {
+                        button.disabled = false; button.textContent = 'ارسال';
+                    }
+                    return;
+                }
+
+                if (!currentUser) {
+                    showToast('برای این کار باید وارد شوید.');
+                    return;
+                }
+
+                const commentId = button.dataset.commentId;
+
+                if (button.classList.contains('reply-btn')) {
+                    const container = document.querySelector(`#comment-${commentId} .reply-form-container`);
+                    if (container) {
+                        if (container.querySelector('.reply-form')) { container.innerHTML = ''; } 
+                        else { container.appendChild(createReplyForm(commentId)); }
+                    }
+                } else if (button.classList.contains('cancel-reply-btn')) {
+                    button.closest('.reply-form').remove();
+                } else if (button.classList.contains('submit-reply-btn')) {
+                    const form = button.closest('.reply-form');
+                    const content = form.querySelector('textarea').value.trim();
+                    if (!content) return;
+                    const isSpoiler = form.querySelector('input[type="checkbox"]').checked;
+                    const parentId = button.dataset.parentId;
+                    button.disabled = true;
+                    try {
+                        const response = await fetch('/api/comments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ manga_id: mangaId, content, is_spoiler: isSpoiler, parent_id: parentId }) });
+                        const result = await response.json();
+                        if (!result.success) throw new Error(result.message);
+
+                        const newReplyElement = createCommentElement(result.comment, true);
+                        const parentCommentEl = document.getElementById(`comment-${parentId}`);
+                        const repliesContainer = parentCommentEl.querySelector('.replies-container');
+                        repliesContainer.appendChild(newReplyElement);
+                        repliesContainer.classList.add('visible'); // Show replies container
+                        form.remove();
+                        commentCountSpan.textContent = parseInt(commentCountSpan.textContent) + 1;
+                    } catch(error) {
+                        showToast('خطا در ارسال پاسخ.');
+                        button.disabled = false;
+                    }
+                } else if (button.classList.contains('vote-btn')) {
+                    try {
+                        const response = await fetch(`/api/comments/${commentId}/vote`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vote_type: button.dataset.voteType }) });
+                        const result = await response.json();
+                        if (!result.success) throw new Error(result.message);
+                        
+                        const updatedComment = result.comment;
+                        const commentElement = document.getElementById(`comment-${commentId}`);
+                        const likeBtn = commentElement.querySelector('.vote-btn[data-vote-type="like"]');
+                        const dislikeBtn = commentElement.querySelector('.vote-btn[data-vote-type="dislike"]');
+                        likeBtn.querySelector('span').textContent = updatedComment.likes;
+                        dislikeBtn.querySelector('span').textContent = updatedComment.dislikes;
+                        likeBtn.className = `vote-btn flex items-center gap-1 hover:text-white ${updatedComment.user_vote === 'like' ? 'text-sky-400' : 'text-zinc-400'}`;
+                        dislikeBtn.className = `vote-btn flex items-center gap-1 hover:text-white ${updatedComment.user_vote === 'dislike' ? 'text-red-400' : 'text-zinc-400'}`;
+                    } catch (error) {
+                        showToast('خطا در ثبت رأی.');
+                    }
+                } else if (button.classList.contains('report-btn')) {
+                    commentIdToReport = commentId;
+                    reportModal.classList.remove('hidden');
+                } else if (button.classList.contains('pin-comment-btn')) {
+                    const isPinned = button.dataset.pinned === 'true';
+                    showConfirmationModal(
+                        isPinned ? 'حذف پین کامنت' : 'پین کردن کامنت', 'آیا از انجام این عملیات مطمئن هستید؟',
+                        'bg-sky-600 hover:bg-sky-700 text-white',
+                        async () => {
+                            await fetch(`/api/comments/${commentId}/pin`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin_status: !isPinned }) });
+                            fetchAndRenderComments(); // For simplicity, a full re-render is okay for pinning.
+                        }
+                    );
+                } else if (button.classList.contains('delete-comment-btn')) {
+                    showConfirmationModal( 'حذف کامنت', 'این عملیات غیرقابل بازگشت است. آیا مطمئن هستید؟', 'bg-red-600 hover:bg-red-700 text-white',
+                        async () => {
+                            try {
+                                const response = await fetch(`/api/comments/${commentId}`, { method: 'DELETE' });
+                                const result = await response.json();
+                                if (!result.success) throw new Error(result.message);
+
+                                document.getElementById(`comment-${commentId}`).remove();
+                                commentCountSpan.textContent = parseInt(commentCountSpan.textContent) - (result.deleted_count || 1);
+                                showToast('نظر با موفقیت حذف شد.', 'success');
+                            } catch (error) {
+                                showToast('خطا در حذف نظر.');
+                            }
+                        }
+                    );
+                } else if (button.classList.contains('options-menu-btn')) {
+                    const menu = button.nextElementSibling;
+                    const isHidden = menu.classList.contains('hidden');
+                    document.querySelectorAll('.dropdown-menu').forEach(m => {
+                        if (m !== menu) m.classList.add('hidden', 'opacity-0', 'scale-95');
+                    });
+                    if (isHidden) {
+                        menu.classList.remove('hidden');
+                        setTimeout(() => menu.classList.remove('opacity-0', 'scale-95'), 10);
+                    } else {
+                         menu.classList.add('hidden', 'opacity-0', 'scale-95');
+                    }
+                }
+            });
+
+            if (sortSelect) { sortSelect.addEventListener('change', fetchAndRenderComments); }
+
+            if (reportModal) {
+                cancelReportBtn.addEventListener('click', () => reportModal.classList.add('hidden'));
+                confirmReportBtn.addEventListener('click', async () => {
+                    if (!commentIdToReport) return;
+                    const reason = reportReasonTextarea.value.trim();
+                    confirmReportBtn.disabled = true; confirmReportBtn.textContent = 'در حال ارسال...';
+                    try {
+                        await fetch(`/api/comments/${commentIdToReport}/report`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason }) });
+                        showToast('گزارش شما با موفقیت ثبت شد. با تشکر!', 'success');
+                    } catch (error) {
+                        showToast('خطا در ارسال گزارش.');
+                    } finally {
+                        reportModal.classList.add('hidden'); reportReasonTextarea.value = '';
+                        confirmReportBtn.disabled = false; confirmReportBtn.textContent = 'ارسال گزارش';
+                        commentIdToReport = null;
+                    }
+                });
+            }
+            
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.relative')) {
+                    document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden', 'opacity-0', 'scale-95'));
+                }
+            });
+
+            fetchAndRenderComments();
+        });
+    }
+</script>

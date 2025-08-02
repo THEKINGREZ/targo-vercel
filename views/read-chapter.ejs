@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خواندن: <%= chapter.manga_title %> - چپتر <%= chapter.chapter_number %></title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { background-color: #111827; color: #f3f4f6; font-family: 'Vazirmatn', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+
+        .floating-watermark {
+            position: fixed; inset: 0; z-index: 9999;
+            pointer-events: none; overflow: hidden; display: flex;
+            flex-wrap: wrap; gap: 100px; align-content: center;
+            justify-content: center; opacity: 0.08;
+        }
+        .watermark-item {
+            font-size: 16px; font-weight: bold; color: #ffffff;
+            transform: rotate(-30deg); white-space: nowrap;
+        }
+
+        .protected-image {
+            -webkit-user-select: none; -ms-user-select: none; user-select: none;
+        }
+
+        #readerHeader {
+            position: fixed; top: 0; left: 0; right: 0; padding: 1rem;
+            transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+            z-index: 20;
+        }
+        #readerHeader.header-hidden { transform: translateY(-150%); opacity: 0; }
+
+        .header-rounded-box {
+            background-color: #1f2937e6; backdrop-filter: blur(8px);
+            border-radius: 1.5rem; padding: 0.5rem 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 64rem; margin: 0 auto;
+        }
+        .page-frame {
+            width: 100%; margin: 0 auto;
+        }
+        #progressBar {
+            position: fixed; bottom: 0; left: 0; height: 3px;
+            background-color: #3b82f6; width: 0%; 
+            transition: width 0.1s linear, opacity 0.3s ease;
+            z-index: 30;
+        }
+        .nav-disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+        .control-button:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .selection-list::-webkit-scrollbar { width: 6px; }
+        .selection-list::-webkit-scrollbar-track { background: #374151; }
+        .selection-list::-webkit-scrollbar-thumb { background: #6b7280; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <% if (user) { %>
+        <div id="watermark-container" class="floating-watermark"></div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const container = document.getElementById('watermark-container');
+                if (container) {
+                    const watermarkText = `@<%= user.app_username %> | ID: <%= user.id %>`;
+                    for (let i = 0; i < 100; i++) {
+                        const item = document.createElement('div');
+                        item.className = 'watermark-item';
+                        item.textContent = watermarkText;
+                        container.appendChild(item);
+                    }
+                }
+            });
+        </script>
+    <% } %>
+
+    <header id="readerHeader">
+        <div class="header-rounded-box flex items-center justify-between gap-4">
+            <a href="/manga/<%= chapter.manga_id %>" class="flex-shrink-0 min-w-0 p-2 rounded-lg group">
+                <h1 class="text-sm sm:text-base font-semibold text-white truncate group-hover:text-sky-400 transition-colors" title="<%= chapter.manga_title %>"><%= chapter.manga_title %></h1>
+                <p class="text-xs text-gray-400 truncate group-hover:text-gray-200 transition-colors">قسمت <%= chapter.chapter_number %></p>
+            </a>
+            <div class="flex-grow text-center">
+                <a href="/" class="text-3xl font-bold text-white hover:text-sky-400 transition-colors">تارگو</a>
+            </div>
+            <div class="flex-shrink-0">
+                <button id="settingsBtn" title="تنظیمات" class="p-3 rounded-full group">
+                    <svg class="h-6 w-6 text-gray-300 group-hover:text-sky-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main id="reader-content" class="flex flex-col items-center gap-1 p-1 md:p-2 pt-28">
+        <% if (accessDenied) { %>
+            <div class="max-w-md w-full bg-zinc-800 border border-amber-500/30 text-center rounded-lg p-8 mt-10">
+                <svg class="mx-auto h-12 w-12 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <h2 class="mt-4 text-xl font-bold text-white">دسترسی محدود</h2>
+                <p class="mt-2 text-zinc-300">برای خواندن این قسمت، لطفاً ابتدا وارد حساب کاربری خود شوید.</p>
+                <a href="/auth?redirect=<%= encodeURIComponent(req.originalUrl) %>" class="mt-6 inline-block bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2.5 px-8 rounded-md transition-colors">
+                    ورود یا ثبت‌نام
+                </a>
+            </div>
+        <% } else if (chapter.page_count > 0) { %>
+            <% for (let i = 1; i <= chapter.page_count; i++) { %>
+                <div class="page-frame">
+                    <img src="/image-proxy/<%= chapter.id %>/<%= i %>" 
+                         alt="صفحه <%= i %> از قسمت <%= chapter.chapter_number %>"
+                         class="protected-image" 
+                         oncontextmenu="return false;">
+                </div>
+            <% } %>
+        <% } else { %>
+            <div class="text-center p-10">
+                <p class="text-zinc-400">هیچ تصویری برای این قسمت یافت نشد.</p>
+            </div>
+        <% } %>
+    </main>
+
+    <nav id="end-of-chapter-nav" class="max-w-3xl mx-auto px-4 py-8 flex justify-between items-center gap-4 hidden">
+        <a id="prevChapterBtn" href="#" class="text-center p-4 w-full bg-gray-800 rounded-lg hover:bg-sky-500/10 border border-transparent hover:border-sky-500 transition-all font-semibold text-white">قسمت قبلی</a>
+        <a id="nextChapterBtn" href="#" class="text-center p-4 w-full bg-gray-800 rounded-lg hover:bg-sky-500/10 border border-transparent hover:border-sky-500 transition-all font-semibold text-white">قسمت بعدی</a>
+    </nav>
+
+    <div id="progressBar"></div>
+
+    <div id="settingsModal" class="fixed inset-0 bg-black/75 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-sm">
+            <h2 class="text-xl font-semibold text-sky-400 mb-6">تنظیمات</h2>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">عرض تصویر</label>
+                    <div class="flex items-center justify-between gap-2">
+                        <button id="widthDecreaseBtn" class="control-button p-2 w-10 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors">-</button>
+                        <button id="openWidthModalBtn" class="font-mono text-white w-full text-center p-2 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors">80%</button>
+                        <button id="widthIncreaseBtn" class="control-button p-2 w-10 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors">+</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">پرش به قسمت</label>
+                    <div class="flex items-center justify-between gap-2">
+                        <button id="jumpToPrevChapterBtn" class="control-button p-2 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+                        <button id="openChapterModalBtn" class="flex-grow w-full p-2 bg-gray-700 text-gray-100 border border-transparent rounded-md hover:bg-gray-600 truncate"></button>
+                        <button id="jumpToNextChapterBtn" class="control-button p-2 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></button>
+                    </div>
+                </div>
+                <div class="border-t border-gray-700"></div>
+                <button id="fullscreenBtn" class="w-full text-center p-2 text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-md transition-colors"></button>
+                <button id="progressBarToggleBtn" class="w-full text-center p-2 text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-md transition-colors"></button>
+                <button id="autoloadToggleBtn" class="w-full text-center p-2 text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-md transition-colors"></button>
+            </div>
+            <button id="closeSettingsBtn" class="mt-8 w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2.5 px-4 rounded-md transition-colors">بستن</button>
+        </div>
+    </div>
+    
+    <div id="widthSelectionModal" class="fixed inset-0 bg-black/75 flex items-center justify-center z-[60] hidden p-4">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-xs flex flex-col">
+            <h3 class="text-xl font-semibold text-sky-400 mb-4">انتخاب عرض</h3>
+            <div id="widthList" class="selection-list flex-grow space-y-2 overflow-y-auto max-h-[60vh] pr-2"></div>
+        </div>
+    </div>
+    
+    <div id="chapterSelectionModal" class="fixed inset-0 bg-black/75 flex items-center justify-center z-[60] hidden p-4">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-sm flex flex-col">
+            <h3 class="text-xl font-semibold text-sky-400 mb-4">انتخاب قسمت</h3>
+            <div id="chapterList" class="selection-list flex-grow space-y-2 overflow-y-auto max-h-[60vh] pr-2"></div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const ALL_CHAPTERS = <%- JSON.stringify(allChapters || []) %>;
+        const CURRENT_CHAPTER_ID = <%= chapter.id %>;
+        const PREV_CHAPTER_ID = <%- JSON.stringify(prevChapterId) %>;
+        const NEXT_CHAPTER_ID = <%- JSON.stringify(nextChapterId) %>;
+        const MANGA_ID = <%= chapter.manga_id %>;
+        const IS_LOGGED_IN = <%- JSON.stringify(user || null) %> !== null;
+        const PAGE_COUNT = <%= chapter.page_count || 0 %>;
+
+        const readerContent = document.getElementById('reader-content');
+        const readerHeader = document.getElementById('readerHeader');
+        const progressBar = document.getElementById('progressBar');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const openWidthModalBtn = document.getElementById('openWidthModalBtn');
+        const widthSelectionModal = document.getElementById('widthSelectionModal');
+        const widthList = document.getElementById('widthList');
+        const widthDecreaseBtn = document.getElementById('widthDecreaseBtn');
+        const widthIncreaseBtn = document.getElementById('widthIncreaseBtn');
+        const openChapterModalBtn = document.getElementById('openChapterModalBtn');
+        const chapterSelectionModal = document.getElementById('chapterSelectionModal');
+        const chapterList = document.getElementById('chapterList');
+        const jumpToPrevChapterBtn = document.getElementById('jumpToPrevChapterBtn');
+        const jumpToNextChapterBtn = document.getElementById('jumpToNextChapterBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const progressBarToggleBtn = document.getElementById('progressBarToggleBtn');
+        const autoloadToggleBtn = document.getElementById('autoloadToggleBtn');
+        const endOfChapterNav = document.getElementById('end-of-chapter-nav');
+        const prevChapterBtn = document.getElementById('prevChapterBtn');
+        const nextChapterBtn = document.getElementById('nextChapterBtn');
+
+        let settings = {
+            imageWidth: parseInt(localStorage.getItem('reader_imageWidth') || '80', 10),
+            showProgressBar: localStorage.getItem('reader_showProgressBar') !== 'false',
+            autoloadNext: localStorage.getItem('reader_autoloadNext') === 'true',
+        };
+        let lastScrollY = window.scrollY;
+
+        function applySettings() {
+            document.querySelectorAll('.page-frame').forEach(frame => { frame.style.maxWidth = `${settings.imageWidth}%`; });
+            openWidthModalBtn.textContent = `${settings.imageWidth}%`;
+            progressBar.style.opacity = settings.showProgressBar ? '1' : '0';
+            updateProgressBarButtonText();
+            updateAutoloadButtonText();
+        }
+
+        function setupEndOfChapterNav() {
+            if (PAGE_COUNT > 0) endOfChapterNav.classList.remove('hidden');
+            if (PREV_CHAPTER_ID) { prevChapterBtn.href = `/chapter/${PREV_CHAPTER_ID}?manga_id=${MANGA_ID}`; } 
+            else { prevChapterBtn.classList.add('nav-disabled'); } 
+            if (NEXT_CHAPTER_ID) { nextChapterBtn.href = `/chapter/${NEXT_CHAPTER_ID}?manga_id=${MANGA_ID}`; } 
+            else { nextChapterBtn.classList.add('nav-disabled'); }
+        }
+
+        function setupAutoloadObserver() {
+            const lastImageFrame = readerContent.querySelector('.page-frame:last-child');
+            if (!lastImageFrame) return;
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && settings.autoloadNext && NEXT_CHAPTER_ID) {
+                    window.location.href = `/chapter/${NEXT_CHAPTER_ID}?manga_id=${MANGA_ID}`;
+                    observer.disconnect();
+                }
+            }, { threshold: 0.5 });
+            observer.observe(lastImageFrame);
+        }
+
+        function handleScroll() {
+            if (window.scrollY > lastScrollY && window.scrollY > 100) { readerHeader.classList.add('header-hidden'); } 
+            else { readerHeader.classList.remove('header-hidden'); }
+            lastScrollY = window.scrollY;
+            if (settings.showProgressBar) {
+                const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+                progressBar.style.width = scrollHeight > 0 ? `${(window.scrollY / scrollHeight) * 100}%` : '0%';
+            }
+        }
+
+        function populateWidthList() {
+            widthList.innerHTML = '';
+            for (let i = 20; i <= 100; i += 5) {
+                const button = document.createElement('button');
+                button.dataset.width = i;
+                button.textContent = `${i}%`;
+                button.className = `w-full text-center p-2 rounded-md transition-colors ${i === settings.imageWidth ? 'bg-sky-600 text-white' : 'bg-gray-700 hover:bg-sky-500'}`;
+                button.addEventListener('click', () => {
+                    settings.imageWidth = i;
+                    localStorage.setItem('reader_imageWidth', i);
+                    applySettings();
+                    widthSelectionModal.classList.add('hidden');
+                });
+                widthList.appendChild(button);
+            }
+        }
+        
+        function populateChapterList() {
+            chapterList.innerHTML = '';
+            if (ALL_CHAPTERS.length === 0) {
+                chapterList.innerHTML = `<p class="text-center text-gray-400">لیست قسمت‌ها موجود نیست</p>`;
+                return;
+            }
+            ALL_CHAPTERS.forEach(ch => {
+                const button = document.createElement('a');
+                button.href = `/chapter/${ch.id}?manga_id=${MANGA_ID}`;
+                button.textContent = `قسمت ${ch.chapter_number}` + (ch.title ? `: ${ch.title}` : '');
+                button.className = `block w-full text-right p-3 rounded-md transition-colors ${ch.id === CURRENT_CHAPTER_ID ? 'bg-sky-600 text-white' : 'bg-gray-700 hover:bg-sky-500'}`;
+                chapterList.appendChild(button);
+            });
+        }
+
+        function updateChapterDisplayButton() {
+            const currentChapter = ALL_CHAPTERS.find(ch => ch.id === CURRENT_CHAPTER_ID);
+            if (currentChapter) {
+                openChapterModalBtn.textContent = `قسمت ${currentChapter.chapter_number}`;
+            } else {
+                openChapterModalBtn.textContent = 'انتخاب قسمت';
+            }
+        }
+
+        function setupChapterJumpButtons() {
+            if (!PREV_CHAPTER_ID) { jumpToPrevChapterBtn.disabled = true; }
+            if (!NEXT_CHAPTER_ID) { jumpToNextChapterBtn.disabled = true; }
+        }
+        
+        function updateFullscreenButtonText() { fullscreenBtn.textContent = document.fullscreenElement ? 'خروج از تمام صفحه' : 'رفتن به تمام صفحه'; }
+        function updateProgressBarButtonText() { progressBarToggleBtn.textContent = settings.showProgressBar ? 'مخفی کردن نوار پیشرفت' : 'نمایش نوار پیشرفت'; }
+        function updateAutoloadButtonText() { autoloadToggleBtn.textContent = settings.autoloadNext ? 'غیرفعال کردن بارگذاری خودکار' : 'فعال کردن بارگذاری خودکار'; }
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+        closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+        openWidthModalBtn.addEventListener('click', () => { populateWidthList(); widthSelectionModal.classList.remove('hidden'); });
+        widthSelectionModal.addEventListener('click', (e) => { if (e.target === widthSelectionModal) widthSelectionModal.classList.add('hidden'); });
+        openChapterModalBtn.addEventListener('click', () => { populateChapterList(); chapterSelectionModal.classList.remove('hidden'); });
+        chapterSelectionModal.addEventListener('click', (e) => { if (e.target === chapterSelectionModal) chapterSelectionModal.classList.add('hidden'); });
+        widthDecreaseBtn.addEventListener('click', () => { settings.imageWidth = Math.max(20, settings.imageWidth - 5); localStorage.setItem('reader_imageWidth', settings.imageWidth); applySettings(); });
+        widthIncreaseBtn.addEventListener('click', () => { settings.imageWidth = Math.min(100, settings.imageWidth + 5); localStorage.setItem('reader_imageWidth', settings.imageWidth); applySettings(); });
+        jumpToPrevChapterBtn.addEventListener('click', () => { if (PREV_CHAPTER_ID) window.location.href = `/chapter/${PREV_CHAPTER_ID}?manga_id=${MANGA_ID}`; });
+        jumpToNextChapterBtn.addEventListener('click', () => { if (NEXT_CHAPTER_ID) window.location.href = `/chapter/${NEXT_CHAPTER_ID}?manga_id=${MANGA_ID}`; });
+        fullscreenBtn.addEventListener('click', () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } else { document.exitFullscreen(); } });
+        document.addEventListener('fullscreenchange', updateFullscreenButtonText);
+        progressBarToggleBtn.addEventListener('click', () => { settings.showProgressBar = !settings.showProgressBar; localStorage.setItem('reader_showProgressBar', settings.showProgressBar); applySettings(); });
+        autoloadToggleBtn.addEventListener('click', () => { settings.autoloadNext = !settings.autoloadNext; localStorage.setItem('reader_autoloadNext', settings.autoloadNext); updateAutoloadButtonText(); });
+
+        updateChapterDisplayButton();
+        setupEndOfChapterNav();
+        setupChapterJumpButtons();
+        updateFullscreenButtonText();
+        applySettings();
+        if (PAGE_COUNT > 0) setupAutoloadObserver();
+
+        if (IS_LOGGED_IN) {
+            fetch(`/api/chapters/${CURRENT_CHAPTER_ID}/mark-as-read`, {
+                method: 'POST'
+            }).catch(err => console.error('Could not mark chapter as read:', err));
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<%- include('partials/header') %>
+
+<div class="container mx-auto px-2 sm:px-4 py-8">
+    <% if (typeof userDetails !== 'undefined' && userDetails) { %>
+        <!-- Main Container -->
+        <div class="bg-zinc-800 shadow-xl rounded-lg overflow-hidden max-w-5xl mx-auto">
+            
+            <!-- Top Section with Banner and User Info -->
+            <div class="relative h-48 bg-zinc-700">
+                <img src="https://placehold.co/1200x300/1f2937/111827?text=Targo+Profile" 
+                     alt="Banner" 
+                     class="w-full h-full object-cover object-center opacity-20">
+                <div class="absolute inset-0 bg-gradient-to-t from-zinc-800 to-transparent"></div>
+                <div class="absolute inset-x-0 bottom-0 transform translate-y-1/2 flex justify-center">
+                    <div class="flex flex-col items-center">
+                        <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-zinc-700 border-4 border-zinc-800 flex items-center justify-center text-4xl font-bold text-sky-400">
+                            <img id="avatarPreview" src="<%= userDetails.profile_image_url || 'https://placehold.co/128x128/27272a/9ca3af?text=' + userDetails.app_username.substring(0, 1).toUpperCase() %>" 
+                                 class="w-full h-full object-cover rounded-full" alt="آواتار">
+                        </div>
+                        <h1 class="text-2xl font-bold text-white mt-3"><%= userDetails.app_username %></h1>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="pt-20 px-4 sm:px-6 lg:px-8 border-b border-zinc-700">
+                <nav class="flex justify-center space-x-4 space-x-reverse" aria-label="Tabs">
+                    <button data-tab-target="settings" class="tab-button active-tab text-white bg-zinc-700/50 px-4 py-2 rounded-t-lg font-semibold">تنظیمات حساب</button>
+                    <button data-tab-target="bookmarks" class="tab-button text-zinc-400 hover:text-white px-4 py-2 rounded-t-lg font-semibold">بوکمارک‌ها</button>
+                </nav>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="p-4 sm:p-6 lg:p-8">
+                <!-- Settings Tab (New Unified Tab) -->
+                <div id="settings" class="tab-content">
+                    <div class="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Left Column: Profile & Connections -->
+                        <div class="space-y-6">
+                            <h3 class="text-xl font-semibold text-sky-300">پروفایل</h3>
+                            <form id="profile-form" action="/account/update-profile" method="POST" enctype="multipart/form-data" class="space-y-4 bg-zinc-900/50 p-4 rounded-lg">
+                                <!-- Avatar Upload -->
+                                <div>
+                                    <label class="block text-sm font-medium text-zinc-300 mb-2">تصویر پروفایل</label>
+                                    <div class="flex items-center gap-4">
+                                        <img id="profileImagePreview" src="<%= userDetails.profile_image_url || 'https://placehold.co/96x96/27272a/9ca3af?text=' + userDetails.app_username.substring(0, 1).toUpperCase() %>" class="w-20 h-20 rounded-full object-cover bg-zinc-700" alt="پیش‌نمایش آواتار">
+                                        <label for="profile_image_input" class="cursor-pointer bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-sm font-semibold py-2 px-4 rounded-md transition-colors">انتخاب تصویر</label>
+                                        <input type="file" name="profile_image" id="profile_image_input" class="hidden" accept="image/png, image/jpeg, image/webp">
+                                    </div>
+                                </div>
+                                <!-- Username -->
+                                <div>
+                                    <label for="app_username" class="block text-sm font-medium text-zinc-300 mb-1">نام کاربری</label>
+                                    <input type="text" name="app_username" value="<%= userDetails.app_username %>" class="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                </div>
+                                <!-- Email -->
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-zinc-300 mb-1">ایمیل</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="email" name="email" value="<%= userDetails.email || '' %>" placeholder="ایمیل خود را وارد کنید..." class="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                        <% if (userDetails.email && !userDetails.email_verified_at) { %>
+                                            <button type="button" id="resend-verification-btn" class="flex-shrink-0 text-xs bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-3 rounded-md">ارسال مجدد</button>
+                                        <% } else if (userDetails.email_verified_at) { %>
+                                            <span class="text-green-400" title="تایید شده">&#10003;</span>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <!-- Phone Number -->
+                                <div>
+                                    <label for="phone_number" class="block text-sm font-medium text-zinc-300 mb-1">شماره تلفن (اختیاری)</label>
+                                    <input type="tel" name="phone_number" value="<%= userDetails.phone_number || '' %>" placeholder="09..." class="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                </div>
+                                <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors">ذخیره پروفایل</button>
+                            </form>
+                        </div>
+
+                        <!-- Right Column: Security & Connections -->
+                        <div class="space-y-6">
+                             <h3 class="text-xl font-semibold text-sky-300">امنیت و اتصالات</h3>
+                            <!-- Change Password -->
+                            <form id="password-form" action="/account/change-password" method="POST" class="space-y-4 bg-zinc-900/50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-zinc-200">تغییر رمز عبور</h4>
+                                <div>
+                                    <label for="current_password" class="block text-sm font-medium text-zinc-300 mb-1">رمز عبور فعلی</label>
+                                    <input type="password" name="current_password" id="current_password" class="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                </div>
+                                <div>
+                                    <label for="new_password" class="block text-sm font-medium text-zinc-300 mb-1">رمز عبور جدید</label>
+                                    <input type="password" name="new_password" id="new_password" class="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                </div>
+                                <button type="submit" class="w-full bg-zinc-600 hover:bg-zinc-500 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors">تغییر رمز</button>
+                            </form>
+                            <!-- Telegram Connection -->
+                            <div class="p-4 bg-zinc-900/50 rounded-lg">
+                                <h4 class="font-semibold text-zinc-200 mb-3">اتصال به تلگرام</h4>
+                                <% if (userDetails.telegram_id) { %>
+                                    <p class="text-sm text-zinc-300 mb-3">حساب شما به اکانت تلگرام <span class="font-bold text-white"><%= userDetails.first_name || userDetails.username %></span> متصل است.</p>
+                                    <button id="disconnect-telegram-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md text-sm">قطع اتصال</button>
+                                <% } else { %>
+                                    <p class="text-xs text-zinc-400 mb-3">با اتصال اکانت تلگرام، از قابلیت‌های بیشتری مانند نوتیفیکیشن چپترهای جدید بهره‌مند شوید.</p>
+                                    <a href="/connect-telegram" target="_blank" rel="noopener noreferrer"
+                                       class="inline-block w-full text-center bg-sky-500 hover:bg-sky-600 text-white font-medium py-2 px-4 rounded-md transition-colors text-sm">
+                                        🔗 اتصال به اکانت تلگرام
+                                    </a>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bookmarks Tab -->
+                <div id="bookmarks" class="tab-content hidden">
+                    <h2 class="text-2xl font-semibold text-sky-300 mb-6 text-center">🔖 مانگاهای بوکمارک شده</h2>
+                    <% if (typeof bookmarks !== 'undefined' && bookmarks && bookmarks.length > 0) { %>
+                        <div id="bookmarks-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <% bookmarks.forEach(bookmark => { %>
+                                <div id="bookmark-<%= bookmark.manga_id %>" class="bg-zinc-700/70 rounded-lg p-3 flex items-center gap-3">
+                                    <a href="/manga/<%= bookmark.manga_id %>" class="flex items-center gap-3 group flex-grow min-w-0">
+                                        <img src="<%= bookmark.cover_image_url || 'https://placehold.co/64x96/27272a/e4e4e7?text=کاور' %>" alt="[کاور <%= bookmark.title %>]"
+                                             class="w-12 h-[72px] object-cover rounded-md flex-shrink-0 group-hover:opacity-80 transition-opacity">
+                                        <div class="overflow-hidden">
+                                            <h3 class="font-semibold text-zinc-100 group-hover:text-sky-400 transition-colors truncate" title="<%= bookmark.title %>"><%= bookmark.title %></h3>
+                                            <p class="text-xs text-zinc-400 mt-1">تیم: <%= bookmark.source_channel_name || 'نامشخص' %></p>
+                                            <p class="text-xs text-zinc-400"><%= bookmark.latest_chapter_number || '?' %> چپتر</p>
+                                        </div>
+                                    </a>
+                                    <div class="flex flex-col items-center gap-2 flex-shrink-0">
+                                        <button data-manga-id="<%= bookmark.manga_id %>" class="delete-bookmark-btn p-2 rounded-full hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition-colors" title="حذف بوکمارک">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                        </button>
+                                        <% if (user && user.telegram_id) { %>
+                                            <label class="inline-flex items-center cursor-pointer" title="دریافت نوتیفیکیشن">
+                                                <input type="checkbox" class="sr-only peer bookmark-notification-toggle" data-manga-id="<%= bookmark.manga_id %>" <% if (bookmark.notifications_enabled) { %>checked<% } %>>
+                                                <div class="relative w-11 h-6 bg-zinc-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                                            </label>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } else { %>
+                        <div class="text-center py-6 bg-zinc-700/30 rounded-lg">
+                            <p class="text-zinc-400">هنوز هیچ مانگایی را بوکمارک نکرده‌اید.</p>
+                            <a href="/mangas" class="mt-3 inline-block text-sm text-sky-400 hover:text-sky-300">مشاهده لیست مانگاها &raquo;</a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="text-center py-10">
+            <p class="text-xl text-zinc-300">برای مشاهده این صفحه باید وارد شوید.</p>
+            <a href="/auth" class="mt-6 inline-block px-6 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors">رفتن به صفحه ورود</a>
+        </div>
+    <% } %>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmation-modal" class="fixed inset-0 bg-black/75 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-zinc-800 p-6 rounded-lg shadow-xl w-full max-w-sm text-center">
+        <h3 id="modal-title" class="text-lg font-bold text-white mb-4"></h3>
+        <p id="modal-text" class="text-zinc-300 mb-6"></p>
+        <div class="flex justify-center gap-4">
+            <button id="modal-cancel-btn" class="px-6 py-2 rounded-md bg-zinc-600 hover:bg-zinc-500 text-white font-semibold">لغو</button>
+            <button id="modal-confirm-btn" class="px-6 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold">تایید</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching logic
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetId = button.dataset.tabTarget;
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active-tab', 'text-white', 'bg-zinc-700/50');
+                btn.classList.add('text-zinc-400', 'hover:text-white');
+            });
+            button.classList.add('active-tab', 'text-white', 'bg-zinc-700/50');
+            button.classList.remove('text-zinc-400', 'hover:text-white');
+            tabContents.forEach(content => {
+                content.classList.toggle('hidden', content.id !== targetId);
+            });
+        });
+    });
+
+    // Profile image preview logic
+    const profileImageInput = document.getElementById('profile_image_input');
+    const profileImagePreview = document.getElementById('profileImagePreview');
+    const avatarPreview = document.getElementById('avatarPreview');
+    if (profileImageInput && profileImagePreview && avatarPreview) {
+        profileImageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    profileImagePreview.src = e.target.result;
+                    avatarPreview.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // --- Action Buttons Logic ---
+    const confirmationModal = document.getElementById('confirmation-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalText = document.getElementById('modal-text');
+    const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    let confirmAction = null;
+
+    function showModal(title, text, onConfirm) {
+        modalTitle.textContent = title;
+        modalText.textContent = text;
+        confirmAction = onConfirm;
+        confirmationModal.classList.remove('hidden');
+    }
+
+    modalCancelBtn.addEventListener('click', () => {
+        confirmationModal.classList.add('hidden');
+        confirmAction = null;
+    });
+
+    modalConfirmBtn.addEventListener('click', () => {
+        if (typeof confirmAction === 'function') {
+            confirmAction();
+        }
+        confirmationModal.classList.add('hidden');
+    });
+
+    // Resend Verification Email
+    const resendBtn = document.getElementById('resend-verification-btn');
+    if (resendBtn) {
+        resendBtn.addEventListener('click', function() {
+            this.disabled = true;
+            this.textContent = 'در حال ارسال...';
+            fetch('/account/resend-verification', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    this.disabled = false;
+                    this.textContent = 'ارسال مجدد';
+                });
+        });
+    }
+
+    // Disconnect Telegram
+    const disconnectBtn = document.getElementById('disconnect-telegram-btn');
+    if (disconnectBtn) {
+        disconnectBtn.addEventListener('click', function() {
+            showModal(
+                'قطع اتصال از تلگرام',
+                'آیا مطمئن هستید؟ با این کار دیگر نوتیفیکیشن چپترهای جدید را دریافت نخواهید کرد.',
+                () => {
+                    fetch('/account/disconnect-telegram', { method: 'POST' })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.reload();
+                            } else {
+                                alert(data.message || 'خطا در قطع اتصال.');
+                            }
+                        });
+                }
+            );
+        });
+    }
+
+    // Delete Bookmark
+    document.querySelectorAll('.delete-bookmark-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const mangaId = this.dataset.mangaId;
+            showModal(
+                'حذف بوکمارک',
+                'آیا از حذف این مانگا از لیست بوکمارک‌های خود مطمئن هستید؟',
+                () => {
+                    fetch('/bookmark/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mangaId })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById(`bookmark-${mangaId}`).remove();
+                        } else {
+                            alert(data.message || 'خطا در حذف بوکمارک.');
+                        }
+                    });
+                }
+            );
+        });
+    });
+
+    // Bookmark notification toggle logic
+    const bookmarkToggles = document.querySelectorAll('.bookmark-notification-toggle');
+    bookmarkToggles.forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const mangaId = this.dataset.mangaId;
+            const isEnabled = this.checked;
+            const currentToggle = this; 
+            currentToggle.disabled = true;
+
+            fetch(`/bookmark/notification`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mangaId: mangaId, isEnabled: isEnabled })
+            })
+            .then(response => {
+                if (!response.ok) { throw new Error(`خطای شبکه: ${response.statusText}`); }
+                return response.json();
+            })
+            .then(data => {
+                if (!data.success) {
+                    currentToggle.checked = !isEnabled; 
+                    alert(data.message || 'خطا در ذخیره تنظیمات.');
+                }
+            })
+            .catch(error => {
+                console.error('Error toggling notification:', error);
+                currentToggle.checked = !isEnabled;
+                alert(error.message || 'خطای شبکه در ارتباط با سرور.');
+            })
+            .finally(() => {
+                currentToggle.disabled = false;
+            });
+        });
+    });
+});
+</script>
+
+<%- include('partials/footer') %>

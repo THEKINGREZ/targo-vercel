@@ -1,0 +1,85 @@
+<%- include('partials/header') %>
+
+<div class="container mx-auto px-2 sm:px-4 py-8">
+    <% if (typeof manga !== 'undefined' && manga) { %>
+        <div class="bg-zinc-800 shadow-xl rounded-lg overflow-hidden">
+            
+            <div class="relative h-48 sm:h-64 bg-zinc-700">
+                <img src="<%= manga.banner_image_url || manga.cover_image_url || 'https://placehold.co/1200x400/1f2937/111827?text=Targo' %>" 
+                     alt="Banner for <%= manga.title %>" 
+                     class="w-full h-full object-cover object-center opacity-30">
+                <div class="absolute inset-0 bg-gradient-to-t from-zinc-800 to-transparent"></div>
+                <div class="absolute inset-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-end h-full pb-6 gap-4 sm:gap-6">
+                        <div class="flex-shrink-0 w-32 sm:w-48 -mb-16">
+                            <img src="<%= manga.cover_image_url || 'https://placehold.co/400x600/27272a/e4e4e7?text=کاور' %>"
+                                 alt="[کاور <%= manga.title %>]"
+                                 class="rounded-md shadow-lg w-full object-cover aspect-[2/3] border-4 border-zinc-800">
+                        </div>
+                        <div class="flex-grow min-w-0">
+                            <h1 class="text-2xl sm:text-4xl font-bold text-white truncate" title="<%= manga.title %>"><%= manga.title %></h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-20 px-4 sm:px-6 lg:px-8 border-b border-zinc-700">
+                <div class="overflow-x-auto whitespace-nowrap -mx-4 px-4">
+                    <nav class="inline-flex space-x-4 space-x-reverse" aria-label="Tabs">
+                        <button data-tab-target="info" class="tab-button active-tab text-white bg-zinc-700/50 px-4 py-2 rounded-t-lg font-semibold">اطلاعات</button>
+                        <button data-tab-target="chapters" class="tab-button text-zinc-400 hover:text-white px-4 py-2 rounded-t-lg font-semibold">قسمت‌ها</button>
+                        <button data-tab-target="team" class="tab-button text-zinc-400 hover:text-white px-4 py-2 rounded-t-lg font-semibold">تیم‌های ترجمه</button>
+                        <button data-tab-target="comments" class="tab-button text-zinc-400 hover:text-white px-4 py-2 rounded-t-lg font-semibold">نظرات</button>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="p-2 sm:p-6 lg:p-8">
+                <div id="info" class="tab-content">
+                    <%- include('partials/_manga_info', { manga, chapters, user, isBookmarked, genres }) %>
+                </div>
+                <div id="chapters" class="tab-content hidden">
+                    <%- include('partials/_manga_chapters', { chapters, manga, total_chapters_count }) %>
+                </div>
+                <div id="team" class="tab-content hidden">
+                    <%- include('partials/_manga_team', { sourceChannels }) %>
+                </div>
+                <div id="comments" class="tab-content hidden">
+                    <%- include('partials/_comments', { manga, user, req }) %>
+                </div>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="text-center py-20">
+            <h2 class="text-2xl text-zinc-400">مانگا یافت نشد.</h2>
+            <p class="text-zinc-500 mt-2">ممکن است این محتوا حذف شده یا آدرس آن اشتباه باشد.</p>
+        </div>
+    <% } %>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetId = button.dataset.tabTarget;
+            
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active-tab', 'text-white', 'bg-zinc-700/50');
+                btn.classList.add('text-zinc-400', 'hover:text-white');
+            });
+            
+            button.classList.add('active-tab', 'text-white', 'bg-zinc-700/50');
+            button.classList.remove('text-zinc-400', 'hover:text-white');
+            
+            tabContents.forEach(content => {
+                content.classList.toggle('hidden', content.id !== targetId);
+            });
+        });
+    });
+});
+</script>
+
+<%- include('partials/footer') %>

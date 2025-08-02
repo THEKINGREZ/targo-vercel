@@ -1,0 +1,21 @@
+<!-- views/partials/_manga_team.ejs -->
+<h2 class="text-2xl font-semibold text-sky-300 mb-6 text-center">تیم‌های ترجمه</h2>
+<% if (typeof sourceChannels !== 'undefined' && sourceChannels.length > 0) { %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% sourceChannels.forEach(channel => { %>
+            <a href="/channel/<%= channel.id %>" class="block text-center bg-zinc-900/50 p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div class="aspect-square w-24 mx-auto overflow-hidden rounded-full bg-zinc-700 p-1">
+                     <img src="<%= channel.profile_image_url || 'https://placehold.co/128x128/3f3f46/a1a1aa?text=' + encodeURIComponent(channel.name.substring(0,1)) %>"
+                         alt="[پروفایل <%= channel.name %>]"
+                         class="w-full h-full object-cover rounded-full">
+                </div>
+                <div class="pt-3">
+                    <h3 class="font-semibold text-zinc-100 truncate group-hover:text-sky-400 transition-colors" title="<%= channel.name %>"><%= channel.name %></h3>
+                    <p class="text-xs text-zinc-400 mt-1"><%= channel.manga_count || 0 %> اثر</p>
+                </div>
+            </a>
+        <% }); %>
+    </div>
+<% } else { %>
+    <p class="text-center text-zinc-400">هیچ تیم ترجمه‌ای برای این مانگا ثبت نشده است.</p>
+<% } %>

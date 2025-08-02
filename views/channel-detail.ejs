@@ -1,0 +1,58 @@
+<%- include('partials/header') %>
+
+<div class="container mx-auto px-2 sm:px-4 py-8">
+    <% if (channel) { %>
+        <div class="bg-zinc-800 shadow-xl rounded-lg p-4 md:p-6 mb-8">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6 sm:space-x-reverse">
+                <img src="<%= channel.profile_image_url || 'https://placehold.co/150x150/3f3f46/a1a1aa?text=' + encodeURIComponent(channel.name.substring(0,1)) %>"
+                     alt="[پروفایل کانال <%= channel.name %>]"
+                     class="w-32 h-32 sm:w-36 sm:h-36 rounded-full object-cover border-4 border-zinc-700 shadow-md">
+                
+                <div class="flex-grow text-center sm:text-right">
+                    <h1 class="text-3xl lg:text-4xl font-bold text-sky-400 mb-1"><%= channel.name %></h1>
+                    <% if (channel.telegram_handle) { %>
+                        <a href="https://t.me/<%= channel.telegram_handle.replace('@', '') %>" target="_blank" rel="noopener noreferrer"
+                           class="text-lg text-sky-500 hover:text-sky-300 transition-colors">
+                            @<%= channel.telegram_handle %>
+                        </a>
+                    <% } %>
+                    <div class="text-sm text-zinc-400 mt-3 space-x-4 space-x-reverse">
+                        <span><b><%= channel.manga_count || 0 %></b> مانگا</span>
+                    </div>
+                    <% if (channel.bio) { %>
+                        <p class="text-zinc-300 mt-4 text-sm leading-relaxed max-w-none"><%- channel.bio.replace(/\n/g, '<br>') %></p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="text-2xl font-semibold text-sky-300 mb-6 px-4 sm:px-0">مانگاهای منتشر شده توسط <%= channel.name %></h2>
+        <% if (mangas && mangas.length > 0) { %>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-6">
+                <% mangas.forEach(manga => { %>
+                    <a href="/manga/<%= manga.id %>" class="block bg-zinc-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl group">
+                        <div class="aspect-[2/3] w-full overflow-hidden">
+                            <img src="<%= manga.cover_image_url || 'https://placehold.co/300x450/27272a/e4e4e7?text=کاور' %>"
+                                 alt="[کاور <%= manga.title %>]" class="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy">
+                        </div>
+                        <div class="p-3">
+                            <h3 class="text-md font-semibold text-zinc-100 truncate group-hover:text-sky-400" title="<%= manga.title %>"><%= manga.title %></h3>
+                        </div>
+                    </a>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="text-center py-10 bg-zinc-800 rounded-lg shadow">
+                <p class="text-xl text-zinc-400">این کانال هنوز هیچ مانگایی منتشر نکرده است.</p>
+            </div>
+        <% } %>
+
+    <% } else { %>
+        <div class="text-center py-10">
+            <h1 class="text-2xl font-bold text-red-400 mb-4">خطا</h1>
+            <p class="text-xl text-zinc-300">کانال درخواستی یافت نشد.</p>
+        </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
