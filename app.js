@@ -8,7 +8,6 @@ const dbPool = require('./config/db');
 const config = require('./config');
 
 const app = express();
-const port = process.env.PORT || 3000;
 
 const ftp = require("basic-ftp");
 const { Readable } = require('stream');
@@ -1123,6 +1122,4 @@ app.delete('/api/comments/:id', isAdmin, async (req, res) => {
     res.json({ success: true });
 });
 
-app.listen(port, () => {
-  console.log(`App listening on port ${port}`);
-});
+module.exports = app;
