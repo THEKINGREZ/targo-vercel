@@ -36,6 +36,7 @@
     .tab-glider {
         position: absolute;
         top: 6px;
+        left: 0; /* Important for positioning */
         height: calc(100% - 12px);
         background-color: #38bdf8; /* sky-400 */
         border-radius: 9999px;
@@ -61,15 +62,17 @@
     
     /* --- FIXED: Carousel transition effect --- */
     .carousel-content {
-        transition: opacity 0.3s ease-in-out, visibility 0.3s;
+        transition: opacity 0.3s ease-in-out;
         opacity: 1;
-        visibility: visible;
     }
     .carousel-content.hidden {
         opacity: 0;
-        visibility: hidden;
-        /* Using display none to prevent layout issues */
-        display: none;
+        /* Use absolute positioning to remove from flow without display:none */
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        pointer-events: none;
     }
     
     /* Enhanced Manga Card with fluid, detailed animations */
@@ -126,7 +129,7 @@
             </div>
         </div>
         
-        <div id="tab-content-container">
+        <div id="tab-content-container" class="relative min-h-[350px]">
             <div id="latest-updates-carousel" class="carousel-content flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 -mx-4 px-4">
                 <% for (let i = 0; i < 8; i++) { %><div class="flex-shrink-0 w-48"><div class="bg-zinc-900 rounded-lg animate-shimmer aspect-[2/3]"></div></div><% } %>
             </div>
@@ -139,7 +142,7 @@
         </div>
     </section>
 
-    <!-- Other sections remain the same... -->
+    <!-- Other sections with generic language... -->
     <section id="genre-spotlight-section" class="bg-gradient-to-br from-amber-500/10 via-zinc-900/10 to-zinc-900/10 p-8 rounded-2xl border border-zinc-800">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             <div class="md:col-span-1 text-center md:text-right">
@@ -266,13 +269,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const tabGlider = document.getElementById('tab-glider');
     const tabButtons = tabsContainer.querySelectorAll('.tab-button');
     const tabContentContainer = document.getElementById('tab-content-container');
+    const carousels = tabContentContainer.querySelectorAll('.carousel-content');
 
     function moveGlider(targetTab) {
-        const targetRect = targetTab.getBoundingClientRect();
-        const containerRect = tabsContainer.getBoundingClientRect();
+        // Using offsetLeft and offsetWidth which are relative to the parent
+        const newLeft = targetTab.offsetLeft;
+        const newWidth = targetTab.offsetWidth;
         
-        tabGlider.style.width = `${targetRect.width}px`;
-        tabGlider.style.transform = `translateX(${targetRect.left - containerRect.left}px)`;
+        tabGlider.style.width = `${newWidth}px`;
+        tabGlider.style.transform = `translateX(${newLeft}px)`;
     }
 
     tabButtons.forEach(button => {
@@ -285,18 +290,17 @@ document.addEventListener('DOMContentLoaded', function() {
             moveGlider(button);
 
             // Switch content
-            Array.from(tabContentContainer.children).forEach(content => {
-                const isTarget = content.id === `${button.dataset.tab}-carousel`;
-                if (isTarget) {
-                    content.classList.remove('hidden');
+            carousels.forEach(carousel => {
+                if (carousel.id === `${button.dataset.tab}-carousel`) {
+                    carousel.classList.remove('hidden');
                 } else {
-                    content.classList.add('hidden');
+                    carousel.classList.add('hidden');
                 }
             });
         });
     });
 
-    // Function to initialize or update glider position
+    // Use a function to initialize or update glider position
     function updateGliderPosition() {
         const activeTab = tabsContainer.querySelector('.active');
         if (activeTab) {
@@ -304,12 +308,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Initialize glider position after a short delay to ensure layout is stable
-    setTimeout(updateGliderPosition, 100);
+    // Initialize glider position on load
+    // Using window.onload to ensure all elements are rendered and have dimensions
+    window.onload = () => {
+        updateGliderPosition();
+    };
 
     // Update glider on window resize
     window.addEventListener('resize', updateGliderPosition);
-
 
     // --- Data Fetching and Population ---
     fetch('/api/home-data')
