@@ -285,6 +285,7 @@ document.addEventListener('DOMContentLoaded', function() {
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
             // Update button active state
+            if (button.classList.contains('active')) return;
             tabsContainer.querySelector('.active').classList.remove('active');
             button.classList.add('active');
             
@@ -313,9 +314,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Initialize glider position after a short delay to ensure layout is stable
-    // This is more reliable than window.onload for dynamic content
-    setTimeout(updateGliderPosition, 100);
+    // Use window.onload to ensure all elements are rendered and have dimensions
+    window.onload = () => {
+        updateGliderPosition();
+    };
 
     // Update glider on window resize
     window.addEventListener('resize', updateGliderPosition);
