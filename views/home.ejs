@@ -1,17 +1,16 @@
 <%- include('partials/header') %>
 
 <style>
-    /* General Styles */
+    /* A more premium, deep-blue background */
     body {
-        background-color: #111827; /* A slightly lighter dark blue-gray */
-        color: #e5e7eb;
+        background-color: #0c1425;
     }
 
     /* Custom scrollbar for carousels */
     .custom-scrollbar::-webkit-scrollbar { height: 8px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #374151; }
 
     /* Skeleton Animation */
     @keyframes shimmer {
@@ -19,46 +18,71 @@
         100% { background-position: 1200px 0; }
     }
     .animate-shimmer {
-        animation: shimmer 1.8s infinite linear;
-        background: linear-gradient(to right, #1f2937 4%, #374151 25%, #1f2937 36%);
+        animation: shimmer 2s infinite linear;
+        background: linear-gradient(to right, #1f2937 8%, #374151 18%, #1f2937 33%);
         background-size: 1200px 100%;
     }
 
-    /* Tab styles */
-    .tab-button.active {
-        color: #38bdf8; /* sky-400 */
-        border-color: #38bdf8;
+    /* Tab styles for a cleaner look */
+    .tab-button {
+        position: relative;
+        transition: color 0.3s ease;
     }
-    
-    /* Manga Card Enhancements */
-    .manga-card .cover-image {
+    .tab-button::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: #38bdf8; /* sky-400 */
+        transform: scaleX(0);
         transition: transform 0.3s ease-in-out;
     }
+    .tab-button.active {
+        color: #38bdf8;
+    }
+    .tab-button.active::after {
+        transform: scaleX(1);
+    }
+    
+    /* Enhanced Manga Card with fluid animations */
+    .manga-card .cover-image {
+        transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
     .manga-card:hover .cover-image {
-        transform: scale(1.05);
+        transform: scale(1.08);
     }
     .manga-card .info-overlay {
-        background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+        background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0) 100%);
         opacity: 0;
-        transition: opacity 0.3s ease-in-out;
+        transform: translateY(20px);
+        transition: opacity 0.4s ease, transform 0.4s ease;
     }
     .manga-card:hover .info-overlay {
         opacity: 1;
+        transform: translateY(0);
+    }
+    .manga-card .chapter-badge {
+        transition: background-color 0.3s ease;
+    }
+    .manga-card:hover .chapter-badge {
+        background-color: #38bdf8;
     }
 </style>
 
-<div class="container mx-auto px-4 space-y-16 py-8">
+<div class="container mx-auto px-4 space-y-20 sm:space-y-24 py-10">
 
     <!-- Featured Section -->
-    <section id="featured-section" class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[60vh] min-h-[500px] max-h-[600px]">
+    <section id="featured-section" class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[70vh] min-h-[550px] max-h-[650px]">
         <!-- Main Featured Item -->
-        <div id="featured-main" class="lg:col-span-2 h-full bg-zinc-800 rounded-2xl animate-shimmer">
+        <div id="featured-main" class="lg:col-span-2 h-full bg-zinc-900 rounded-2xl animate-shimmer">
             <!-- Skeleton for main featured item -->
         </div>
         <!-- Side Featured Items -->
         <div class="hidden lg:flex flex-col gap-6 h-full">
-            <div id="featured-side-1" class="h-1/2 bg-zinc-800 rounded-2xl animate-shimmer"></div>
-            <div id="featured-side-2" class="h-1/2 bg-zinc-800 rounded-2xl animate-shimmer"></div>
+            <div id="featured-side-1" class="h-1/2 bg-zinc-900 rounded-2xl animate-shimmer"></div>
+            <div id="featured-side-2" class="h-1/2 bg-zinc-900 rounded-2xl animate-shimmer"></div>
         </div>
     </section>
 
@@ -69,55 +93,43 @@
 
     <!-- Explore Section with Tabs -->
     <section id="explore-section">
-        <div class="flex items-center justify-between mb-6 border-b-2 border-zinc-800 pb-3">
-            <h2 class="text-3xl font-bold text-sky-400">کاوش کنید</h2>
-            <div id="tabs-container" class="flex space-x-4 space-x-reverse text-lg font-semibold">
-                <button class="tab-button border-b-2 border-transparent transition-colors pb-2 active" data-tab="latest-updates">🚀 بروزرسانی‌ها</button>
-                <button class="tab-button border-b-2 border-transparent transition-colors pb-2" data-tab="popular">🔥 محبوب‌ها</button>
-                <button class="tab-button border-b-2 border-transparent transition-colors pb-2" data-tab="recent">✨ جدیدترین‌ها</button>
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-8 pb-3">
+            <h2 class="text-3xl sm:text-4xl font-bold text-sky-400 mb-4 sm:mb-0">کاوش در دنیای مانگا</h2>
+            <div id="tabs-container" class="flex space-x-6 space-x-reverse text-lg font-semibold text-zinc-400">
+                <button class="tab-button pb-2 active" data-tab="latest-updates">🚀 بروزرسانی‌ها</button>
+                <button class="tab-button pb-2" data-tab="popular">🔥 محبوب‌ترین‌ها</button>
+                <button class="tab-button pb-2" data-tab="recent">✨ جدیدترین‌ها</button>
             </div>
         </div>
         
-        <!-- Tab Content -->
         <div id="tab-content-container" class="relative">
-            <!-- Latest Updates Carousel -->
-            <div id="latest-updates-carousel" class="flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4">
-                <% for (let i = 0; i < 8; i++) { %>
-                    <div class="flex-shrink-0 w-44"><div class="bg-zinc-800 rounded-lg animate-shimmer aspect-[2/3]"></div></div>
-                <% } %>
+            <div id="latest-updates-carousel" class="flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 -mx-4 px-4">
+                <% for (let i = 0; i < 8; i++) { %><div class="flex-shrink-0 w-48"><div class="bg-zinc-900 rounded-lg animate-shimmer aspect-[2/3]"></div></div><% } %>
             </div>
-            <!-- Popular Carousel (hidden by default) -->
-            <div id="popular-mangas-carousel" class="hidden flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4">
-                 <% for (let i = 0; i < 8; i++) { %>
-                    <div class="flex-shrink-0 w-44"><div class="bg-zinc-800 rounded-lg animate-shimmer aspect-[2/3]"></div></div>
-                <% } %>
+            <div id="popular-mangas-carousel" class="hidden flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 -mx-4 px-4">
+                 <% for (let i = 0; i < 8; i++) { %><div class="flex-shrink-0 w-48"><div class="bg-zinc-900 rounded-lg animate-shimmer aspect-[2/3]"></div></div><% } %>
             </div>
-            <!-- Recent Mangas Carousel (hidden by default) -->
-            <div id="recent-mangas-carousel" class="hidden flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4">
-                <% for (let i = 0; i < 8; i++) { %>
-                    <div class="flex-shrink-0 w-44"><div class="bg-zinc-800 rounded-lg animate-shimmer aspect-[2/3]"></div></div>
-                <% } %>
+            <div id="recent-mangas-carousel" class="hidden flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 -mx-4 px-4">
+                <% for (let i = 0; i < 8; i++) { %><div class="flex-shrink-0 w-48"><div class="bg-zinc-900 rounded-lg animate-shimmer aspect-[2/3]"></div></div><% } %>
             </div>
         </div>
     </section>
 
     <!-- Genre Spotlight Section -->
-    <section id="genre-spotlight-section" class="bg-zinc-900/50 p-8 rounded-2xl">
+    <section id="genre-spotlight-section" class="bg-gradient-to-br from-amber-500/10 via-zinc-900/10 to-zinc-900/10 p-8 rounded-2xl border border-zinc-800">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             <div class="md:col-span-1 text-center md:text-right">
-                <h3 class="text-zinc-400 text-lg">ژانر منتخب</h3>
-                <h2 class="text-5xl font-extrabold text-amber-400 my-3">اکشن</h2>
+                <h3 class="text-zinc-400 text-lg font-semibold">ژانر منتخب هفته</h3>
+                <h2 class="text-5xl font-extrabold text-amber-400 my-3">فانتزی</h2>
                 <p class="text-zinc-300 leading-relaxed mb-6">
-                    آثاری پر از هیجان، مبارزات نفس‌گیر و ماجراجویی‌های بی‌پایان که شما را در جای خود میخکوب می‌کنند.
+                    سفری به دنیاهای جادویی، موجودات افسانه‌ای و ماجراجویی‌های حماسی که تخیل شما را به پرواز در می‌آورند.
                 </p>
-                <a href="/mangas?genres=ACTION_GENRE_ID" class="bg-amber-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-amber-600 transition-colors">
-                    مشاهده همه
+                <a href="/mangas?genres=FANTASY_GENRE_ID" class="inline-block bg-amber-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-amber-600 transition-colors transform hover:scale-105">
+                    مشاهده همه آثار فانتزی
                 </a>
             </div>
             <div id="genre-spotlight-carousel" class="md:col-span-2 flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 -mr-8 pr-8">
-                 <% for (let i = 0; i < 4; i++) { %>
-                    <div class="flex-shrink-0 w-44"><div class="bg-zinc-800 rounded-lg animate-shimmer aspect-[2/3]"></div></div>
-                <% } %>
+                 <% for (let i = 0; i < 4; i++) { %><div class="flex-shrink-0 w-48"><div class="bg-zinc-900 rounded-lg animate-shimmer aspect-[2/3]"></div></div><% } %>
             </div>
         </div>
     </section>
@@ -125,13 +137,11 @@
     <!-- Top Channels Section -->
     <section id="top-channels-section">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-3xl font-bold text-green-400">📢 کانال‌های برتر</h2>
-            <a href="/channels" class="text-sm text-sky-400 hover:text-sky-300 transition-colors">مشاهده همه &raquo;</a>
+            <h2 class="text-3xl sm:text-4xl font-bold text-green-400">📢 تیم‌های برتر ترجمه</h2>
+            <a href="/channels" class="text-sm text-sky-400 hover:text-sky-300 transition-colors">مشاهده همه تیم‌ها &raquo;</a>
         </div>
         <div id="top-channels-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <% for (let i = 0; i < 4; i++) { %>
-                <div class="bg-zinc-800 rounded-lg animate-shimmer h-24"></div>
-            <% } %>
+            <% for (let i = 0; i < 4; i++) { %><div class="bg-zinc-900 rounded-lg animate-shimmer h-24"></div><% } %>
         </div>
     </section>
 </div>
@@ -141,13 +151,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function createMangaCard(manga) {
         return `
-            <a href="/manga/${manga.id}" class="manga-card block bg-zinc-800 rounded-lg shadow-lg overflow-hidden group relative aspect-[2/3] w-44 flex-shrink-0">
-                <img src="${manga.cover_image_url || 'https://placehold.co/300x450/1f2937/374151?text=کاور'}"
+            <a href="/manga/${manga.id}" class="manga-card block bg-zinc-900 rounded-lg shadow-lg overflow-hidden group relative aspect-[2/3] w-48 flex-shrink-0">
+                <img src="${manga.cover_image_url || 'https://placehold.co/320x480/1f2937/374151?text=کاور'}"
                      alt="[کاور ${manga.title}]"
                      class="cover-image w-full h-full object-cover" loading="lazy">
-                <div class="info-overlay absolute inset-0 p-3 flex flex-col justify-end">
-                    <h3 class="font-bold text-white text-lg leading-tight">${manga.title}</h3>
-                    <p class="text-xs text-zinc-300 mt-1">${manga.source_channel_name || 'نامشخص'}</p>
+                <div class="absolute top-2 right-2 chapter-badge bg-black/60 text-white text-xs font-semibold px-2.5 py-1 rounded-md backdrop-blur-sm">
+                    ${manga.latest_chapter_number || '?'} چپتر
+                </div>
+                <div class="info-overlay absolute inset-0 p-4 flex flex-col justify-end">
+                    <h3 class="font-bold text-white text-xl leading-tight">${manga.title}</h3>
+                    <p class="text-sm text-zinc-300 mt-1">${manga.source_channel_name || 'نامشخص'}</p>
                 </div>
             </a>
         `;
@@ -155,10 +168,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function createChannelCard(channel) {
         return `
-            <a href="/channel/${channel.id}" class="bg-zinc-800 p-4 rounded-lg flex items-center gap-4 hover:bg-zinc-700/50 transition-colors group">
+            <a href="/channel/${channel.id}" class="bg-zinc-900 p-4 rounded-lg flex items-center gap-4 hover:bg-zinc-800/50 transition-colors group border border-transparent hover:border-green-500/50">
                 <img src="${channel.profile_image_url || 'https://placehold.co/64x64/374151/9ca3af?text=' + encodeURIComponent(channel.name.substring(0,1))}"
                      alt="[پروفایل ${channel.name}]"
-                     class="w-16 h-16 rounded-full object-cover border-2 border-zinc-700 group-hover:border-green-400 transition-colors">
+                     class="w-16 h-16 rounded-full object-cover border-2 border-zinc-700 group-hover:border-green-400 transition-all duration-300 transform group-hover:scale-110">
                 <div class="overflow-hidden">
                     <h3 class="font-semibold text-zinc-100 truncate group-hover:text-green-300 transition-colors" title="${channel.name}">${channel.name}</h3>
                     <p class="text-sm text-zinc-400">${channel.manga_count || 0} اثر</p>
@@ -173,12 +186,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return `
                 <div class="relative w-full h-full rounded-2xl overflow-hidden group">
                     <img src="${manga.banner_image_url || manga.cover_image_url}" class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105" alt="[بنر ${manga.title}]">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent"></div>
-                    <div class="relative z-10 flex flex-col justify-end h-full p-8 text-white">
-                        <h2 class="text-4xl font-extrabold">${manga.title}</h2>
-                        <p class="mt-2 max-w-xl text-zinc-300 line-clamp-2">${manga.description || ''}</p>
-                        <div class="flex flex-wrap gap-2 my-4">${genresHTML}</div>
-                        <a href="/manga/${manga.id}" class="mt-4 bg-sky-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-sky-600 transition-colors w-fit">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent"></div>
+                    <div class="relative z-10 flex flex-col justify-end h-full p-6 sm:p-8 text-white">
+                        <h2 class="text-4xl lg:text-5xl font-extrabold" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.7);">${manga.title}</h2>
+                        <p class="mt-3 max-w-xl text-zinc-200 line-clamp-2 leading-relaxed">${manga.description || ''}</p>
+                        <div class="flex flex-wrap gap-2 my-5">${genresHTML}</div>
+                        <a href="/manga/${manga.id}" class="mt-4 bg-sky-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-sky-600 transition-all transform hover:scale-105 shadow-lg w-fit">
                             مشاهده و خواندن
                         </a>
                     </div>
@@ -186,14 +199,14 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         } else {
              return `
-                <div class="relative w-full h-full rounded-2xl overflow-hidden group">
+                <a href="/manga/${manga.id}" class="relative w-full h-full rounded-2xl overflow-hidden group block">
                     <img src="${manga.cover_image_url}" class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105" alt="[کاور ${manga.title}]">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                     <div class="relative z-10 flex flex-col justify-end h-full p-4 text-white">
                         <h3 class="font-bold text-xl">${manga.title}</h3>
-                        <a href="/manga/${manga.id}" class="text-sm text-sky-300 hover:underline mt-1">شروع خواندن &raquo;</a>
+                        <span class="text-sm text-sky-300 group-hover:underline mt-1">شروع خواندن &raquo;</span>
                     </div>
-                </div>
+                </a>
             `;
         }
     }
@@ -214,7 +227,6 @@ document.addEventListener('DOMContentLoaded', function() {
         gridElement.innerHTML = items.map(cardCreatorFunction).join('');
     }
 
-    // Tab switching logic
     const tabsContainer = document.getElementById('tabs-container');
     const tabContentContainer = document.getElementById('tab-content-container');
     tabsContainer.addEventListener('click', (e) => {
@@ -233,11 +245,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function animateCount(elementId, finalValue) {
         const element = document.getElementById(elementId);
         if (!element) return;
-        
         let startValue = 0;
         const duration = 1500;
         const stepTime = Math.max(1, Math.floor(duration / finalValue));
-        
         const timer = setInterval(() => {
             startValue += Math.ceil(finalValue / (duration / stepTime));
             if (startValue >= finalValue) {
@@ -248,43 +258,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }, stepTime);
     }
 
-    // Fetch all homepage data
     fetch('/api/home-data')
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Populate Featured Section
                 if (data.popularMangas && data.popularMangas.length > 0) {
                     document.getElementById('featured-main').innerHTML = createFeaturedCard(data.popularMangas[0], true);
-                    if (data.popularMangas.length > 1) {
-                        document.getElementById('featured-side-1').innerHTML = createFeaturedCard(data.popularMangas[1], false);
-                    }
-                    if (data.popularMangas.length > 2) {
-                        document.getElementById('featured-side-2').innerHTML = createFeaturedCard(data.popularMangas[2], false);
-                    }
+                    if (data.popularMangas.length > 1) document.getElementById('featured-side-1').innerHTML = createFeaturedCard(data.popularMangas[1], false);
+                    if (data.popularMangas.length > 2) document.getElementById('featured-side-2').innerHTML = createFeaturedCard(data.popularMangas[2], false);
                 }
 
-                // Populate Carousels
                 populateCarousel(document.getElementById('latest-updates-carousel'), data.latestUpdates, createMangaCard);
                 populateCarousel(document.getElementById('popular-mangas-carousel'), data.popularMangas, createMangaCard);
                 populateCarousel(document.getElementById('recent-mangas-carousel'), data.recentMangas, createMangaCard);
-
-                // Populate Genre Spotlight (using some popular mangas as example)
-                populateCarousel(document.getElementById('genre-spotlight-carousel'), data.popularMangas.slice(3, 8), createMangaCard);
-
-                // Populate Top Channels
+                populateCarousel(document.getElementById('genre-spotlight-carousel'), data.popularMangas.slice(3, 9), createMangaCard);
                 populateGrid(document.getElementById('top-channels-grid'), data.suggestedChannels.slice(0, 4), createChannelCard);
 
-                // Animate Stats
                 if (data.siteStats) {
                     animateCount('stats-manga-count', data.siteStats.mangaCount);
                     animateCount('stats-chapter-count', data.siteStats.chapterCount);
                     animateCount('stats-channel-count', data.siteStats.channelCount);
                 }
-
             } else { throw new Error(data.message || 'Failed to load data.'); }
         })
         .catch(error => {
