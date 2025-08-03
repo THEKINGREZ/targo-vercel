@@ -44,4 +44,11 @@
             <p>&copy; 1403 تارگو. تمامی حقوق محفوظ است.</p>
         </div>
     </div>
+    <% if (process.env.VERCEL_ENV === 'production') { %>
+        <script>
+            window.va = window.va || function () { (window.va.q = window.va.q || []).push(arguments); };
+        </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <% } %>
+
 </footer>
