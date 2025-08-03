@@ -1,9 +1,10 @@
 <%- include('partials/header') %>
 
 <style>
-    /* A more premium, deep-blue background */
+    /* A more premium, deep-blue background for a cinematic feel */
     body {
         background-color: #0c1425;
+        color: #e5e7eb;
     }
 
     /* Custom scrollbar for carousels */
@@ -12,7 +13,7 @@
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #374151; }
 
-    /* Skeleton Animation */
+    /* A smoother, more subtle skeleton animation */
     @keyframes shimmer {
         0% { background-position: -1200px 0; }
         100% { background-position: 1200px 0; }
@@ -23,7 +24,7 @@
         background-size: 1200px 100%;
     }
 
-    /* Tab styles for a cleaner look */
+    /* Tab styles with a fluid underline animation */
     .tab-button {
         position: relative;
         transition: color 0.3s ease;
@@ -37,7 +38,8 @@
         height: 3px;
         background-color: #38bdf8; /* sky-400 */
         transform: scaleX(0);
-        transition: transform 0.3s ease-in-out;
+        transform-origin: center;
+        transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
     }
     .tab-button.active {
         color: #38bdf8;
@@ -46,7 +48,7 @@
         transform: scaleX(1);
     }
     
-    /* Enhanced Manga Card with fluid animations */
+    /* Enhanced Manga Card with fluid, detailed animations */
     .manga-card .cover-image {
         transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
@@ -64,10 +66,11 @@
         transform: translateY(0);
     }
     .manga-card .chapter-badge {
-        transition: background-color 0.3s ease;
+        transition: background-color 0.3s ease, transform 0.3s ease;
     }
     .manga-card:hover .chapter-badge {
         background-color: #38bdf8;
+        transform: scale(1.1);
     }
 </style>
 
@@ -77,7 +80,7 @@
     <section id="featured-section" class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[70vh] min-h-[550px] max-h-[650px]">
         <!-- Main Featured Item -->
         <div id="featured-main" class="lg:col-span-2 h-full bg-zinc-900 rounded-2xl animate-shimmer">
-            <!-- Skeleton for main featured item -->
+            <!-- Content will be injected by JavaScript -->
         </div>
         <!-- Side Featured Items -->
         <div class="hidden lg:flex flex-col gap-6 h-full">
@@ -212,16 +215,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function populateCarousel(carouselElement, items, cardCreatorFunction) {
-        if (!carouselElement || !items || items.length === 0) {
-            if(carouselElement) carouselElement.innerHTML = '<p class="text-zinc-400 px-4">موردی برای نمایش یافت نشد.</p>';
+        if (!carouselElement) return;
+        if (!items || items.length === 0) {
+            carouselElement.innerHTML = '<p class="text-zinc-400 px-4">موردی برای نمایش یافت نشد.</p>';
             return;
         }
         carouselElement.innerHTML = items.map(cardCreatorFunction).join('');
     }
     
     function populateGrid(gridElement, items, cardCreatorFunction) {
-        if (!gridElement || !items || items.length === 0) {
-            if(gridElement) gridElement.innerHTML = '<p class="text-zinc-400 px-4 col-span-full text-center">موردی برای نمایش یافت نشد.</p>';
+        if (!gridElement) return;
+        if (!items || items.length === 0) {
+            gridElement.innerHTML = '<p class="text-zinc-400 px-4 col-span-full text-center">موردی برای نمایش یافت نشد.</p>';
             return;
         }
         gridElement.innerHTML = items.map(cardCreatorFunction).join('');
