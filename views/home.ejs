@@ -62,12 +62,14 @@
     
     /* --- FIXED: Carousel transition effect --- */
     .carousel-content {
-        transition: opacity 0.3s ease-in-out;
+        transition: opacity 0.3s ease-in-out, visibility 0.3s;
         opacity: 1;
+        visibility: visible;
     }
     .carousel-content.hidden {
         opacity: 0;
-        /* Use absolute positioning to remove from flow without display:none */
+        visibility: hidden;
+        /* Use absolute positioning to remove from flow and prevent layout shifts */
         position: absolute;
         top: 0;
         left: 0;
@@ -289,9 +291,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Move the glider
             moveGlider(button);
 
-            // Switch content
+            // --- FIXED: Content Switching Logic ---
             carousels.forEach(carousel => {
-                if (carousel.id === `${button.dataset.tab}-carousel`) {
+                // Construct the expected ID based on the button's data-tab attribute
+                const expectedId = `${button.dataset.tab}-carousel`;
+                
+                if (carousel.id === expectedId) {
                     carousel.classList.remove('hidden');
                 } else {
                     carousel.classList.add('hidden');
@@ -299,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
-
+    
     // Use a function to initialize or update glider position
     function updateGliderPosition() {
         const activeTab = tabsContainer.querySelector('.active');
@@ -308,11 +313,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Initialize glider position on load
-    // Using window.onload to ensure all elements are rendered and have dimensions
-    window.onload = () => {
-        updateGliderPosition();
-    };
+    // Initialize glider position after a short delay to ensure layout is stable
+    // This is more reliable than window.onload for dynamic content
+    setTimeout(updateGliderPosition, 100);
 
     // Update glider on window resize
     window.addEventListener('resize', updateGliderPosition);
