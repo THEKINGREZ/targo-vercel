@@ -24,28 +24,47 @@
         background-size: 1200px 100%;
     }
 
-    /* Tab styles with a fluid underline animation */
+    /* --- NEW: Advanced Tab Switcher --- */
+    .tabs-container {
+        position: relative;
+        display: flex;
+        background-color: #1f2937;
+        padding: 6px;
+        border-radius: 9999px; /* pill shape */
+        width: fit-content;
+    }
+    .tab-glider {
+        position: absolute;
+        top: 6px;
+        height: calc(100% - 12px);
+        background-color: #38bdf8; /* sky-400 */
+        border-radius: 9999px;
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2);
+    }
     .tab-button {
         position: relative;
+        z-index: 1;
+        padding: 10px 24px;
+        font-semibold: 600;
+        color: #9ca3af; /* gray-400 */
+        border-radius: 9999px;
         transition: color 0.3s ease;
-    }
-    .tab-button::after {
-        content: '';
-        position: absolute;
-        bottom: -4px;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background-color: #38bdf8; /* sky-400 */
-        transform: scaleX(0);
-        transform-origin: center;
-        transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        white-space: nowrap;
     }
     .tab-button.active {
-        color: #38bdf8;
+        color: #ffffff;
     }
-    .tab-button.active::after {
-        transform: scaleX(1);
+    
+    /* Carousel transition effect */
+    .carousel-content {
+        transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+    }
+    .carousel-content.hidden {
+        opacity: 0;
+        transform: translateY(10px);
+        position: absolute;
+        pointer-events: none;
     }
     
     /* Enhanced Manga Card with fluid, detailed animations */
@@ -78,11 +97,7 @@
 
     <!-- Featured Section -->
     <section id="featured-section" class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[70vh] min-h-[550px] max-h-[650px]">
-        <!-- Main Featured Item -->
-        <div id="featured-main" class="lg:col-span-2 h-full bg-zinc-900 rounded-2xl animate-shimmer">
-            <!-- Content will be injected by JavaScript -->
-        </div>
-        <!-- Side Featured Items -->
+        <div id="featured-main" class="lg:col-span-2 h-full bg-zinc-900 rounded-2xl animate-shimmer"></div>
         <div class="hidden lg:flex flex-col gap-6 h-full">
             <div id="featured-side-1" class="h-1/2 bg-zinc-900 rounded-2xl animate-shimmer"></div>
             <div id="featured-side-2" class="h-1/2 bg-zinc-900 rounded-2xl animate-shimmer"></div>
@@ -94,31 +109,33 @@
         <%- include('partials/_stats') %>
     </section>
 
-    <!-- Explore Section with Tabs -->
+    <!-- Explore Section with NEW Tab Switcher -->
     <section id="explore-section">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-8 pb-3">
-            <h2 class="text-3xl sm:text-4xl font-bold text-sky-400 mb-4 sm:mb-0">کاوش در دنیای مانگا</h2>
-            <div id="tabs-container" class="flex space-x-6 space-x-reverse text-lg font-semibold text-zinc-400">
-                <button class="tab-button pb-2 active" data-tab="latest-updates">🚀 بروزرسانی‌ها</button>
-                <button class="tab-button pb-2" data-tab="popular">🔥 محبوب‌ترین‌ها</button>
-                <button class="tab-button pb-2" data-tab="recent">✨ جدیدترین‌ها</button>
+            <h2 class="text-3xl sm:text-4xl font-bold text-sky-400 mb-6 sm:mb-0">کاوش در دنیای مانگا</h2>
+            <!-- NEW: Redesigned Tab Switcher -->
+            <div id="tabs-container" class="tabs-container">
+                <div id="tab-glider" class="tab-glider"></div>
+                <button class="tab-button active" data-tab="latest-updates">🚀 بروزرسانی‌ها</button>
+                <button class="tab-button" data-tab="popular">🔥 محبوب‌ترین‌ها</button>
+                <button class="tab-button" data-tab="recent">✨ جدیدترین‌ها</button>
             </div>
         </div>
         
-        <div id="tab-content-container" class="relative">
-            <div id="latest-updates-carousel" class="flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 -mx-4 px-4">
+        <div id="tab-content-container" class="relative min-h-[350px]">
+            <div id="latest-updates-carousel" class="carousel-content flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 -mx-4 px-4">
                 <% for (let i = 0; i < 8; i++) { %><div class="flex-shrink-0 w-48"><div class="bg-zinc-900 rounded-lg animate-shimmer aspect-[2/3]"></div></div><% } %>
             </div>
-            <div id="popular-mangas-carousel" class="hidden flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 -mx-4 px-4">
+            <div id="popular-mangas-carousel" class="carousel-content hidden flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 -mx-4 px-4">
                  <% for (let i = 0; i < 8; i++) { %><div class="flex-shrink-0 w-48"><div class="bg-zinc-900 rounded-lg animate-shimmer aspect-[2/3]"></div></div><% } %>
             </div>
-            <div id="recent-mangas-carousel" class="hidden flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 -mx-4 px-4">
+            <div id="recent-mangas-carousel" class="carousel-content hidden flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 -mx-4 px-4">
                 <% for (let i = 0; i < 8; i++) { %><div class="flex-shrink-0 w-48"><div class="bg-zinc-900 rounded-lg animate-shimmer aspect-[2/3]"></div></div><% } %>
             </div>
         </div>
     </section>
 
-    <!-- Genre Spotlight Section -->
+    <!-- Other sections remain the same... -->
     <section id="genre-spotlight-section" class="bg-gradient-to-br from-amber-500/10 via-zinc-900/10 to-zinc-900/10 p-8 rounded-2xl border border-zinc-800">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             <div class="md:col-span-1 text-center md:text-right">
@@ -137,7 +154,6 @@
         </div>
     </section>
 
-    <!-- Top Channels Section -->
     <section id="top-channels-section">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-3xl sm:text-4xl font-bold text-green-400">📢 تیم‌های برتر ترجمه</h2>
@@ -151,13 +167,12 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-
+    // Functions to create cards (same as before)
     function createMangaCard(manga) {
         return `
             <a href="/manga/${manga.id}" class="manga-card block bg-zinc-900 rounded-lg shadow-lg overflow-hidden group relative aspect-[2/3] w-48 flex-shrink-0">
                 <img src="${manga.cover_image_url || 'https://placehold.co/320x480/1f2937/374151?text=کاور'}"
-                     alt="[کاور ${manga.title}]"
-                     class="cover-image w-full h-full object-cover" loading="lazy">
+                     alt="[کاور ${manga.title}]" class="cover-image w-full h-full object-cover" loading="lazy">
                 <div class="absolute top-2 right-2 chapter-badge bg-black/60 text-white text-xs font-semibold px-2.5 py-1 rounded-md backdrop-blur-sm">
                     ${manga.latest_chapter_number || '?'} چپتر
                 </div>
@@ -168,13 +183,11 @@ document.addEventListener('DOMContentLoaded', function() {
             </a>
         `;
     }
-
     function createChannelCard(channel) {
         return `
             <a href="/channel/${channel.id}" class="bg-zinc-900 p-4 rounded-lg flex items-center gap-4 hover:bg-zinc-800/50 transition-colors group border border-transparent hover:border-green-500/50">
                 <img src="${channel.profile_image_url || 'https://placehold.co/64x64/374151/9ca3af?text=' + encodeURIComponent(channel.name.substring(0,1))}"
-                     alt="[پروفایل ${channel.name}]"
-                     class="w-16 h-16 rounded-full object-cover border-2 border-zinc-700 group-hover:border-green-400 transition-all duration-300 transform group-hover:scale-110">
+                     alt="[پروفایل ${channel.name}]" class="w-16 h-16 rounded-full object-cover border-2 border-zinc-700 group-hover:border-green-400 transition-all duration-300 transform group-hover:scale-110">
                 <div class="overflow-hidden">
                     <h3 class="font-semibold text-zinc-100 truncate group-hover:text-green-300 transition-colors" title="${channel.name}">${channel.name}</h3>
                     <p class="text-sm text-zinc-400">${channel.manga_count || 0} اثر</p>
@@ -182,7 +195,6 @@ document.addEventListener('DOMContentLoaded', function() {
             </a>
         `;
     }
-    
     function createFeaturedCard(manga, isMain = false) {
         const genresHTML = (manga.genres || []).slice(0, 3).map(g => `<span class="text-xs font-semibold px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full">${g.name}</span>`).join('');
         if (isMain) {
@@ -213,7 +225,6 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
     }
-
     function populateCarousel(carouselElement, items, cardCreatorFunction) {
         if (!carouselElement) return;
         if (!items || items.length === 0) {
@@ -222,7 +233,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         carouselElement.innerHTML = items.map(cardCreatorFunction).join('');
     }
-    
     function populateGrid(gridElement, items, cardCreatorFunction) {
         if (!gridElement) return;
         if (!items || items.length === 0) {
@@ -231,22 +241,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         gridElement.innerHTML = items.map(cardCreatorFunction).join('');
     }
-
-    const tabsContainer = document.getElementById('tabs-container');
-    const tabContentContainer = document.getElementById('tab-content-container');
-    tabsContainer.addEventListener('click', (e) => {
-        if (e.target.tagName === 'BUTTON') {
-            tabsContainer.querySelector('.active').classList.remove('active');
-            e.target.classList.add('active');
-            
-            Array.from(tabContentContainer.children).forEach(content => {
-                content.classList.add('hidden');
-            });
-            
-            document.getElementById(`${e.target.dataset.tab}-carousel`).classList.remove('hidden');
-        }
-    });
-
     function animateCount(elementId, finalValue) {
         const element = document.getElementById(elementId);
         if (!element) return;
@@ -263,6 +257,44 @@ document.addEventListener('DOMContentLoaded', function() {
         }, stepTime);
     }
 
+    // --- NEW: Advanced Tab Switcher Logic ---
+    const tabsContainer = document.getElementById('tabs-container');
+    const tabGlider = document.getElementById('tab-glider');
+    const tabButtons = tabsContainer.querySelectorAll('.tab-button');
+    const tabContentContainer = document.getElementById('tab-content-container');
+
+    function moveGlider(targetTab) {
+        const targetRect = targetTab.getBoundingClientRect();
+        const containerRect = tabsContainer.getBoundingClientRect();
+        
+        tabGlider.style.width = `${targetRect.width}px`;
+        tabGlider.style.transform = `translateX(${targetRect.left - containerRect.left}px)`;
+    }
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Update button active state
+            tabsContainer.querySelector('.active').classList.remove('active');
+            button.classList.add('active');
+            
+            // Move the glider
+            moveGlider(button);
+
+            // Switch content
+            Array.from(tabContentContainer.children).forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`${button.dataset.tab}-carousel`).classList.remove('hidden');
+        });
+    });
+
+    // Initialize glider position
+    const initialActiveTab = tabsContainer.querySelector('.active');
+    if (initialActiveTab) {
+        moveGlider(initialActiveTab);
+    }
+
+    // --- Data Fetching and Population ---
     fetch('/api/home-data')
         .then(response => response.json())
         .then(data => {
@@ -273,9 +305,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.popularMangas.length > 2) document.getElementById('featured-side-2').innerHTML = createFeaturedCard(data.popularMangas[2], false);
                 }
 
+                // Populate ALL carousels
                 populateCarousel(document.getElementById('latest-updates-carousel'), data.latestUpdates, createMangaCard);
                 populateCarousel(document.getElementById('popular-mangas-carousel'), data.popularMangas, createMangaCard);
                 populateCarousel(document.getElementById('recent-mangas-carousel'), data.recentMangas, createMangaCard);
+                
                 populateCarousel(document.getElementById('genre-spotlight-carousel'), data.popularMangas.slice(3, 9), createMangaCard);
                 populateGrid(document.getElementById('top-channels-grid'), data.suggestedChannels.slice(0, 4), createChannelCard);
 
