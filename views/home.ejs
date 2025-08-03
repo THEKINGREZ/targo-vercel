@@ -24,7 +24,7 @@
         background-size: 1200px 100%;
     }
 
-    /* --- NEW: Advanced Tab Switcher --- */
+    /* --- FIXED: Advanced Tab Switcher --- */
     .tabs-container {
         position: relative;
         display: flex;
@@ -46,25 +46,30 @@
         position: relative;
         z-index: 1;
         padding: 10px 24px;
-        font-semibold: 600;
+        font-weight: 600;
         color: #9ca3af; /* gray-400 */
         border-radius: 9999px;
         transition: color 0.3s ease;
         white-space: nowrap;
+        background: none;
+        border: none;
+        cursor: pointer;
     }
     .tab-button.active {
         color: #ffffff;
     }
     
-    /* Carousel transition effect */
+    /* --- FIXED: Carousel transition effect --- */
     .carousel-content {
-        transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+        transition: opacity 0.3s ease-in-out, visibility 0.3s;
+        opacity: 1;
+        visibility: visible;
     }
     .carousel-content.hidden {
         opacity: 0;
-        transform: translateY(10px);
-        position: absolute;
-        pointer-events: none;
+        visibility: hidden;
+        /* Using display none to prevent layout issues */
+        display: none;
     }
     
     /* Enhanced Manga Card with fluid, detailed animations */
@@ -109,11 +114,10 @@
         <%- include('partials/_stats') %>
     </section>
 
-    <!-- Explore Section with NEW Tab Switcher -->
+    <!-- Explore Section with FIXED Tab Switcher -->
     <section id="explore-section">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-8 pb-3">
-            <h2 class="text-3xl sm:text-4xl font-bold text-sky-400 mb-6 sm:mb-0">کاوش در دنیای مانگا</h2>
-            <!-- NEW: Redesigned Tab Switcher -->
+            <h2 class="text-3xl sm:text-4xl font-bold text-sky-400 mb-6 sm:mb-0">کاوش در دنیای تارگو</h2>
             <div id="tabs-container" class="tabs-container">
                 <div id="tab-glider" class="tab-glider"></div>
                 <button class="tab-button active" data-tab="latest-updates">🚀 بروزرسانی‌ها</button>
@@ -122,7 +126,7 @@
             </div>
         </div>
         
-        <div id="tab-content-container" class="relative min-h-[350px]">
+        <div id="tab-content-container">
             <div id="latest-updates-carousel" class="carousel-content flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 -mx-4 px-4">
                 <% for (let i = 0; i < 8; i++) { %><div class="flex-shrink-0 w-48"><div class="bg-zinc-900 rounded-lg animate-shimmer aspect-[2/3]"></div></div><% } %>
             </div>
@@ -257,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, stepTime);
     }
 
-    // --- NEW: Advanced Tab Switcher Logic ---
+    // --- FIXED: Advanced Tab Switcher Logic ---
     const tabsContainer = document.getElementById('tabs-container');
     const tabGlider = document.getElementById('tab-glider');
     const tabButtons = tabsContainer.querySelectorAll('.tab-button');
@@ -282,17 +286,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Switch content
             Array.from(tabContentContainer.children).forEach(content => {
-                content.classList.add('hidden');
+                const isTarget = content.id === `${button.dataset.tab}-carousel`;
+                if (isTarget) {
+                    content.classList.remove('hidden');
+                } else {
+                    content.classList.add('hidden');
+                }
             });
-            document.getElementById(`${button.dataset.tab}-carousel`).classList.remove('hidden');
         });
     });
 
-    // Initialize glider position
-    const initialActiveTab = tabsContainer.querySelector('.active');
-    if (initialActiveTab) {
-        moveGlider(initialActiveTab);
+    // Function to initialize or update glider position
+    function updateGliderPosition() {
+        const activeTab = tabsContainer.querySelector('.active');
+        if (activeTab) {
+            moveGlider(activeTab);
+        }
     }
+
+    // Initialize glider position after a short delay to ensure layout is stable
+    setTimeout(updateGliderPosition, 100);
+
+    // Update glider on window resize
+    window.addEventListener('resize', updateGliderPosition);
+
 
     // --- Data Fetching and Population ---
     fetch('/api/home-data')
@@ -305,7 +322,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.popularMangas.length > 2) document.getElementById('featured-side-2').innerHTML = createFeaturedCard(data.popularMangas[2], false);
                 }
 
-                // Populate ALL carousels
                 populateCarousel(document.getElementById('latest-updates-carousel'), data.latestUpdates, createMangaCard);
                 populateCarousel(document.getElementById('popular-mangas-carousel'), data.popularMangas, createMangaCard);
                 populateCarousel(document.getElementById('recent-mangas-carousel'), data.recentMangas, createMangaCard);
