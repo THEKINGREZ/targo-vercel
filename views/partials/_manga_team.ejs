@@ -1,21 +1,63 @@
-<!-- views/partials/_manga_team.ejs -->
-<h2 class="text-2xl font-semibold text-sky-300 mb-6 text-center">تیم‌های ترجمه</h2>
-<% if (typeof sourceChannels !== 'undefined' && sourceChannels.length > 0) { %>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <% sourceChannels.forEach(channel => { %>
-            <a href="/channel/<%= channel.id %>" class="block text-center bg-zinc-900/50 p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div class="aspect-square w-24 mx-auto overflow-hidden rounded-full bg-zinc-700 p-1">
-                     <img src="<%= channel.profile_image_url || 'https://placehold.co/128x128/3f3f46/a1a1aa?text=' + encodeURIComponent(channel.name.substring(0,1)) %>"
-                         alt="[پروفایل <%= channel.name %>]"
-                         class="w-full h-full object-cover rounded-full">
+
+<div class="space-y-6">
+    <h2 class="text-2xl font-semibold text-sky-300 mb-6">تیم‌های ترجمه و منابع</h2>
+    
+    <% if (sourceChannels && sourceChannels.length > 0) { %>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <% sourceChannels.forEach(channel => { %>
+                <div class="bg-zinc-900/50 rounded-lg p-6 hover:bg-zinc-800/70 transition-colors group">
+                    <div class="flex items-center space-x-4 space-x-reverse mb-4">
+                        <img src="<%= channel.profile_image_url || 'https://placehold.co/64x64/3f3f46/a1a1aa?text=' + encodeURIComponent(channel.name.substring(0,1)) %>"
+                             alt="[پروفایل <%= channel.name %>]"
+                             class="w-16 h-16 rounded-full object-cover border-2 border-zinc-700 group-hover:border-sky-500 transition-colors">
+                        <div class="flex-grow min-w-0">
+                            <h3 class="text-lg font-semibold text-zinc-100 group-hover:text-sky-400 transition-colors truncate">
+                                <%= channel.name %>
+                            </h3>
+                            <p class="text-sm text-zinc-400 mt-1">
+                                <span class="font-medium"><%= channel.manga_count || 0 %></span> مانگا منتشر شده
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-2 space-x-reverse text-sm text-zinc-400">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>منبع ترجمه</span>
+                        </div>
+                        <a href="/channel/<%= channel.id %>" 
+                           class="bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-colors">
+                            مشاهده کانال
+                        </a>
+                    </div>
                 </div>
-                <div class="pt-3">
-                    <h3 class="font-semibold text-zinc-100 truncate group-hover:text-sky-400 transition-colors" title="<%= channel.name %>"><%= channel.name %></h3>
-                    <p class="text-xs text-zinc-400 mt-1"><%= channel.manga_count || 0 %> اثر</p>
+            <% }); %>
+        </div>
+        
+        <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-6">
+            <div class="flex items-start space-x-3 space-x-reverse">
+                <svg class="w-6 h-6 text-amber-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <div>
+                    <h4 class="text-amber-400 font-semibold mb-2">حمایت از تیم‌های ترجمه</h4>
+                    <p class="text-amber-200/80 text-sm leading-relaxed">
+                        لطفاً از تیم‌های ترجمه حمایت کنید. آن‌ها زمان و انرژی زیادی صرف ترجمه و به اشتراک‌گذاری این محتوا می‌کنند.
+                        با عضویت در کانال‌های آن‌ها و ارسال بازخورد مثبت، از تلاش‌هایشان قدردانی کنید.
+                    </p>
                 </div>
-            </a>
-        <% }); %>
-    </div>
-<% } else { %>
-    <p class="text-center text-zinc-400">هیچ تیم ترجمه‌ای برای این مانگا ثبت نشده است.</p>
-<% } %>
+            </div>
+        </div>
+        
+    <% } else { %>
+        <div class="text-center py-12 bg-zinc-900/30 rounded-lg">
+            <svg class="w-16 h-16 text-zinc-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            <h3 class="text-lg font-semibold text-zinc-400 mb-2">اطلاعات تیم ترجمه موجود نیست</h3>
+            <p class="text-zinc-500">متأسفانه اطلاعات تیم‌های ترجمه این مانگا در دسترس نیست.</p>
+        </div>
+    <% } %>
+</div>

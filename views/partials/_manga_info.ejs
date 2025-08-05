@@ -1,112 +1,175 @@
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Left Column: Actions, Details, Genres -->
-    <div class="lg:col-span-1 space-y-6">
-        
-        <!-- Action Buttons -->
-        <div class="flex flex-col gap-3">
+    <!-- بخش اصلی اطلاعات مانگا -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- دکمه‌های عملکرد -->
+        <div class="flex flex-wrap gap-3 justify-center sm:justify-start">
             <% if (chapters && chapters.length > 0) { %>
-                <% 
-                    let buttonText = 'شروع به خواندن';
-                    let targetChapterId = chapters[0]?.id; // پیش‌فرض: آخرین چپتر منتشر شده
-
-                    if (user && continueChapterId) {
-                        buttonText = 'ادامه خواندن';
-                        targetChapterId = continueChapterId;
-                    }
-                %>
-                <a href="<%= READER_BASE_URL %>/chapter/<%= targetChapterId %>?manga_id=<%= manga.id %>" class="w-full text-center px-6 py-3 rounded-md font-bold bg-sky-500 hover:bg-sky-600 text-white transition-colors">
-                    <%= buttonText %>
+                <% const firstChapter = chapters[chapters.length - 1]; %>
+                <a href="/chapter/<%= firstChapter.id %>" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                    </svg>
+                    شروع مطالعه
                 </a>
+                
+                <% if (user && continueChapterId) { %>
+                    <a href="/chapter/<%= continueChapterId %>" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+                        </svg>
+                        ادامه مطالعه
+                    </a>
+                <% } %>
             <% } %>
+            
             <% if (user) { %>
-                <button id="bookmarkToggleButton" data-manga-id="<%= manga.id %>" data-is-bookmarked="<%= isBookmarked ? '1' : '0' %>" class="w-full px-6 py-2.5 rounded-md font-semibold transition-all duration-150 ease-in-out flex items-center justify-center gap-2 <%= isBookmarked ? 'bg-pink-600 hover:bg-pink-700 text-white' : 'bg-zinc-700 hover:bg-zinc-600 text-zinc-200' %>">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 icon-heart" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
-                    <span class="button-text"><%= isBookmarked ? 'حذف از بوکمارک' : 'افزودن به بوکمارک' %></span>
-                    <svg class="animate-spin h-5 w-5 button-spinner" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M12 2.99988V5.99988M12 18.0001V21.0001M5.63604 5.63611L7.75701 7.75708M16.2426 16.2429L18.3636 18.364M2.99951 12.0001H5.99951M17.9995 12.0001H20.9995M5.63604 18.364L7.75701 16.2429M16.2426 7.75708L18.3636 5.63611" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <button id="bookmark-toggle" data-manga-id="<%= manga.id %>" data-bookmarked="<%= isBookmarked %>" 
+                        class="<%= isBookmarked ? 'bg-red-500 hover:bg-red-600' : 'bg-zinc-600 hover:bg-zinc-700' %> text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"/>
+                    </svg>
+                    <span><%= isBookmarked ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها' %></span>
                 </button>
-            <% } else { %>
-                <a href="/auth?redirect=<%= encodeURIComponent('/manga/' + manga.id) %>" class="w-full text-center px-6 py-2.5 rounded-md font-semibold bg-zinc-700 hover:bg-zinc-600 text-zinc-200 transition-colors">برای بوکمارک کردن وارد شوید</a>
             <% } %>
         </div>
 
-        <!-- Details Box -->
-        <div class="bg-zinc-900/50 p-4 rounded-lg space-y-3 text-sm">
-            <div class="flex justify-between"><span class="text-zinc-400">نوع:</span><span class="font-semibold text-white">مانگا</span></div>
-            <div class="flex justify-between"><span class="text-zinc-400">وضعیت:</span><span class="font-semibold text-white"><%= manga.status || 'نامشخص' %></span></div>
-            <div class="flex justify-between"><span class="text-zinc-400">نویسنده:</span><span class="font-semibold text-white truncate"><%= manga.author || 'نامشخص' %></span></div>
-            <div class="flex justify-between"><span class="text-zinc-400">هنرمند:</span><span class="font-semibold text-white truncate"><%= manga.artist || 'نامشخص' %></span></div>
-            <div class="flex justify-between"><span class="text-zinc-400">سال انتشار:</span><span class="font-semibold text-white"><%= manga.release_year || 'نامشخص' %></span></div>
-            <div class="flex justify-between"><span class="text-zinc-400">بازدید:</span><span class="font-semibold text-white"><%= manga.view_count ? manga.view_count.toLocaleString('fa-IR') : '0' %></span></div>
-        </div>
-
-        <!-- Genres -->
-        <div>
-            <h3 class="font-semibold text-zinc-300 mb-3">ژانرها</h3>
-            <div class="flex flex-wrap gap-2">
-                <% if (genres && genres.length > 0) { genres.forEach(genre => { %>
-                    <span class="bg-zinc-700 text-sky-300 text-xs font-semibold px-3 py-1 rounded-full"><%= genre.name %></span>
-                <% }); } %>
+        <!-- توضیحات -->
+        <% if (manga.description && manga.description.trim() !== '') { %>
+            <div class="bg-zinc-900/50 rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-sky-300 mb-4">درباره مانگا</h3>
+                <div class="text-zinc-300 leading-relaxed">
+                    <div id="description-preview" class="line-clamp-3">
+                        <%- manga.description.replace(/\n/g, '<br>') %>
+                    </div>
+                    <div id="description-full" class="hidden">
+                        <%- manga.description.replace(/\n/g, '<br>') %>
+                    </div>
+                    <% if (manga.description.length > 300) { %>
+                        <button id="description-toggle" class="text-sky-400 hover:text-sky-300 text-sm font-semibold mt-2">
+                            نمایش بیشتر
+                        </button>
+                    <% } %>
+                </div>
             </div>
-        </div>
+        <% } %>
+
+        <!-- ژانرها -->
+        <% if (genres && genres.length > 0) { %>
+            <div class="bg-zinc-900/50 rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-sky-300 mb-4">ژانرها</h3>
+                <div class="flex flex-wrap gap-2">
+                    <% genres.forEach(genre => { %>
+                        <span class="bg-sky-500/20 text-sky-300 px-3 py-1 rounded-full text-sm font-medium border border-sky-500/30">
+                            <%= genre.name %>
+                        </span>
+                    <% }); %>
+                </div>
+            </div>
+        <% } %>
     </div>
 
-    <!-- Right Column: Synopsis -->
-    <div class="lg:col-span-2">
-        <h2 class="text-xl font-semibold text-sky-300 mb-3">خلاصه داستان</h2>
-        <div class="text-zinc-300 leading-relaxed max-w-none prose prose-invert prose-sm"><%- manga.description ? manga.description.replace(/\n/g, '<br>') : 'توضیحی ارائه نشده است.' %></div>
+    <!-- بخش اطلاعات جانبی -->
+    <div class="space-y-6">
+        <!-- آمار -->
+        <div class="bg-zinc-900/50 rounded-lg p-6">
+            <h3 class="text-xl font-semibold text-sky-300 mb-4">آمار</h3>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-zinc-400">تعداد بازدید:</span>
+                    <span class="font-semibold text-zinc-100"><%= (manga.view_count || 0).toLocaleString('fa-IR') %></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-zinc-400">تعداد قسمت‌ها:</span>
+                    <span class="font-semibold text-zinc-100"><%= total_chapters_count || 0 %></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-zinc-400">وضعیت:</span>
+                    <span class="font-semibold <%= manga.status === 'ongoing' ? 'text-green-400' : manga.status === 'completed' ? 'text-blue-400' : 'text-yellow-400' %>">
+                        <%= manga.status === 'ongoing' ? 'در حال انتشار' : manga.status === 'completed' ? 'تمام شده' : 'متوقف شده' %>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- اطلاعات تکمیلی -->
+        <div class="bg-zinc-900/50 rounded-lg p-6">
+            <h3 class="text-xl font-semibold text-sky-300 mb-4">جزئیات</h3>
+            <div class="space-y-3">
+                <% if (manga.author) { %>
+                    <div class="flex justify-between items-center">
+                        <span class="text-zinc-400">نویسنده:</span>
+                        <span class="font-semibold text-zinc-100"><%= manga.author %></span>
+                    </div>
+                <% } %>
+                <% if (manga.artist) { %>
+                    <div class="flex justify-between items-center">
+                        <span class="text-zinc-400">هنرمند:</span>
+                        <span class="font-semibold text-zinc-100"><%= manga.artist %></span>
+                    </div>
+                <% } %>
+                <% if (manga.release_year) { %>
+                    <div class="flex justify-between items-center">
+                        <span class="text-zinc-400">سال انتشار:</span>
+                        <span class="font-semibold text-zinc-100"><%= manga.release_year %></span>
+                    </div>
+                <% } %>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    const bookmarkButton = document.getElementById('bookmarkToggleButton');
-    if (bookmarkButton && !bookmarkButton.hasAttribute('data-listener-attached')) {
-        bookmarkButton.setAttribute('data-listener-attached', 'true');
-        bookmarkButton.addEventListener('click', function() {
-            const mangaId = this.dataset.mangaId;
-            const isCurrentlyBookmarked = this.dataset.isBookmarked === '1';
-            const action = isCurrentlyBookmarked ? 'unbookmark' : 'bookmark';
-            
-            const buttonTextEl = this.querySelector('.button-text');
-            const buttonSpinnerEl = this.querySelector('.button-spinner');
-            this.disabled = true;
-            if(buttonTextEl) buttonTextEl.style.display = 'none';
-            if(buttonSpinnerEl) buttonSpinnerEl.style.display = 'inline-block';
-
-            fetch(`/bookmark/toggle`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mangaId: mangaId, action: action })
-            })
-            .then(response => {
-                if (!response.ok) { throw new Error(`خطای شبکه: ${response.statusText}`); }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    const isNowBookmarked = data.status === 'bookmarked';
-                    this.dataset.isBookmarked = isNowBookmarked ? '1' : '0';
-                    if(buttonTextEl) buttonTextEl.textContent = isNowBookmarked ? 'حذف از بوکمارک' : 'افزودن به بوکمارک';
-                    
-                    this.classList.toggle('bg-pink-600', isNowBookmarked);
-                    this.classList.toggle('hover:bg-pink-700', isNowBookmarked);
-                    this.classList.toggle('text-white', isNowBookmarked);
-
-                    this.classList.toggle('bg-zinc-700', !isNowBookmarked);
-                    this.classList.toggle('hover:bg-zinc-600', !isNowBookmarked);
-                    this.classList.toggle('text-zinc-200', !isNowBookmarked);
-                } else {
-                    alert(data.message || 'خطا در انجام عملیات.');
-                }
-            })
-            .catch(error => {
-                console.error('Error toggling bookmark:', error);
-                alert(error.message || 'خطای شبکه. لطفا دوباره تلاش کنید.');
-            })
-            .finally(() => {
-                this.disabled = false; 
-                if(buttonTextEl) buttonTextEl.style.display = 'inline';
-                if(buttonSpinnerEl) buttonSpinnerEl.style.display = 'none';
-            });
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle description
+    const descToggle = document.getElementById('description-toggle');
+    if (descToggle) {
+        const preview = document.getElementById('description-preview');
+        const full = document.getElementById('description-full');
+        
+        descToggle.addEventListener('click', function() {
+            if (full.classList.contains('hidden')) {
+                preview.classList.add('hidden');
+                full.classList.remove('hidden');
+                descToggle.textContent = 'نمایش کمتر';
+            } else {
+                preview.classList.remove('hidden');
+                full.classList.add('hidden');
+                descToggle.textContent = 'نمایش بیشتر';
+            }
         });
     }
+
+    // Bookmark functionality
+    const bookmarkBtn = document.getElementById('bookmark-toggle');
+    if (bookmarkBtn) {
+        bookmarkBtn.addEventListener('click', async function() {
+            const mangaId = this.dataset.mangaId;
+            const isBookmarked = this.dataset.bookmarked === 'true';
+            const action = isBookmarked ? 'unbookmark' : 'bookmark';
+            
+            try {
+                const response = await fetch('/bookmark/toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mangaId, action })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    const newState = result.status === 'bookmarked';
+                    this.dataset.bookmarked = newState;
+                    this.className = newState 
+                        ? 'bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center gap-2'
+                        : 'bg-zinc-600 hover:bg-zinc-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center gap-2';
+                    this.querySelector('span').textContent = newState 
+                        ? 'حذف از علاقه‌مندی‌ها' 
+                        : 'افزودن به علاقه‌مندی‌ها';
+                }
+            } catch (error) {
+                console.error('Bookmark error:', error);
+            }
+        });
+    }
+});
 </script>

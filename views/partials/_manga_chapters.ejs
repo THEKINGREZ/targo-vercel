@@ -60,165 +60,164 @@
         background-color: #ca8a04;
         color: white;
     }
-     .chapter-card .status-purchased:hover {
+    .chapter-card .status-purchased:hover {
         background-color: #a16207;
     }
 </style>
 
-<div class="flex justify-between items-center mb-4">
-    <h2 class="text-xl font-semibold text-sky-300">لیست قسمت‌ها (<span id="total-chapters-count">0</span>)</h2>
-    <button id="sort-chapters-btn" class="flex items-center gap-2 text-sm text-zinc-300 hover:text-white p-2 rounded-md transition-colors">
-        <span id="sort-order-text">جدیدترین</span>
-        <svg id="sort-icon" class="w-5 h-5 transition-transform" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.47-3.47a.75.75 0 111.06 1.06l-4.75 4.75a.75.75 0 01-1.06 0l-4.75-4.75a.75.75 0 111.06-1.06l3.47 3.47V3.75A.75.75 0 0110 3z" clip-rule="evenodd" /></svg>
-    </button>
-</div>
+<div class="space-y-6">
+    <!-- هدر و کنترل‌ها -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 class="text-2xl font-semibold text-sky-300">
+            قسمت‌ها (<span id="chapters-count"><%= total_chapters_count || 0 %></span>)
+        </h2>
+        <div class="flex items-center gap-3">
+            <label for="chapters-sort" class="text-sm text-zinc-400">مرتب‌سازی:</label>
+            <select id="chapters-sort" class="bg-zinc-700 text-zinc-200 text-sm rounded-md border-zinc-600 focus:ring-sky-500 focus:border-sky-500">
+                <option value="desc">جدیدترین ابتدا</option>
+                <option value="asc">قدیمی‌ترین ابتدا</option>
+            </select>
+        </div>
+    </div>
 
-<div id="chapter-list-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-</div>
+    <!-- لیست قسمت‌ها -->
+    <div id="chapters-container" class="space-y-2"></div>
 
-<div id="load-more-container" class="mt-8 text-center">
-    <button id="load-more-btn" class="bg-zinc-700 hover:bg-zinc-600 text-zinc-200 font-semibold py-2 px-8 rounded-md transition-colors">
-        بارگذاری بیشتر
-    </button>
+    <!-- بارگذاری بیشتر -->
+    <div id="load-more-container" class="text-center hidden">
+        <button id="load-more-btn" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+            بارگذاری بیشتر
+        </button>
+    </div>
+
+    <!-- لودینگ -->
+    <div id="chapters-loading" class="text-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-400 mx-auto"></div>
+        <p class="text-zinc-400 mt-2">در حال بارگذاری...</p>
+    </div>
 </div>
 
 <script>
-    if (!window.chaptersScriptLoaded) {
-        window.chaptersScriptLoaded = true;
+document.addEventListener('DOMContentLoaded', function() {
+    const mangaId = <%= manga.id %>;
+    const chaptersContainer = document.getElementById('chapters-container');
+    const loadMoreContainer = document.getElementById('load-more-container');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const chaptersLoading = document.getElementById('chapters-loading');
+    const sortSelect = document.getElementById('chapters-sort');
+    const chaptersCount = document.getElementById('chapters-count');
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const initialChapters = <%- JSON.stringify(chapters || []) %>;
-            const totalChapters = <%- total_chapters_count || 0 %>;
-            const mangaIdForChapters = <%- (typeof manga !== 'undefined' && manga) ? manga.id : 'null' %>;
+    let currentPage = 1;
+    let isLoading = false;
+    let hasMoreChapters = true;
 
-            const chapterListContainer = document.getElementById('chapter-list-container');
-            const loadMoreContainer = document.getElementById('load-more-container');
-            const loadMoreBtn = document.getElementById('load-more-btn');
-            const sortButton = document.getElementById('sort-chapters-btn');
-            const sortIcon = document.getElementById('sort-icon');
-            const sortOrderText = document.getElementById('sort-order-text');
-            const totalChaptersCountEl = document.getElementById('total-chapters-count');
-            
-            let currentPage = 1;
-            let isFetching = false;
-            let sortOrder = 'desc';
+    function createChapterElement(chapter) {
+        const div = document.createElement('div');
+        div.className = `bg-zinc-900/50 rounded-lg p-4 hover:bg-zinc-800/70 transition-colors ${chapter.is_read ? 'opacity-60' : ''}`;
 
-            const createChapterCard = (chapter) => {
-                const cardElement = document.createElement('div');
-                cardElement.className = 'chapter-card group';
+        const lockIcon = chapter.is_locked ? `
+            <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+            </svg>
+        ` : '';
 
-                let statusText, statusClass, linkHref;
+        const readBadge = chapter.is_read ? `
+            <span class="bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-xs font-medium">
+                خوانده شده
+            </span>
+        ` : '';
 
-                if (chapter.is_locked) {
-                    statusText = 'لاگین کنید';
-                    statusClass = 'status-locked';
-                    linkHref = '/auth?redirect=' + encodeURIComponent(window.location.pathname);
-                } else {
-                    statusText = chapter.is_read ? 'خواندن مجدد' : 'خواندن';
-                    statusClass = chapter.is_read ? 'status-purchased' : 'status-free';
-                    linkHref = `https://read.targo.fun/chapter/${chapter.id}?manga_id=${mangaIdForChapters}`;
+        div.innerHTML = `
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4 flex-grow min-w-0">
+                    <img src="${chapter.thumbnail_url}" alt="تصویر قسمت" class="w-12 h-16 object-cover rounded flex-shrink-0">
+                    <div class="min-w-0 flex-grow">
+                        <h3 class="font-semibold text-zinc-100 truncate">
+                            قسمت ${chapter.chapter_number}${chapter.title ? ': ' + chapter.title : ''}
+                        </h3>
+                        <p class="text-sm text-zinc-400 mt-1">
+                            ${new Date(chapter.upload_date).toLocaleDateString('fa-IR')}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    ${readBadge}
+                    ${lockIcon}
+                    ${chapter.is_locked ?
+                        '<span class="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-lg text-sm font-medium">قفل شده</span>' :
+                        '<a href="/chapter/' + chapter.id + '" class="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">مطالعه</a>'
+                    }
+                </div>
+            </div>
+        `;
+
+        return div;
+    }
+
+    async function loadChapters(page = 1, append = false) {
+        if (isLoading) return;
+        isLoading = true;
+
+        if (!append) {
+            chaptersLoading.classList.remove('hidden');
+            chaptersContainer.innerHTML = '';
+        }
+
+        loadMoreBtn.disabled = true;
+        loadMoreBtn.textContent = 'در حال بارگذاری...';
+
+        try {
+            const sortOrder = sortSelect.value;
+            const response = await fetch(`/api/manga/${mangaId}/chapters?page=${page}&sort=${sortOrder}`);
+            const chapters = await response.json();
+
+            if (chapters.length === 0) {
+                hasMoreChapters = false;
+                loadMoreContainer.classList.add('hidden');
+                if (!append && chaptersContainer.children.length === 0) {
+                    chaptersContainer.innerHTML = '<div class="text-center py-8 text-zinc-400">هیچ قسمتی یافت نشد.</div>';
                 }
-
-                cardElement.innerHTML = `
-                    <a href="${linkHref}" class="block">
-                        <img src="${chapter.thumbnail_url || 'https://placehold.co/300x180/27272a/9ca3af?text=Image'}" alt="تصویر قسمت ${chapter.chapter_number}" class="thumbnail bg-zinc-800">
-                        <div class="overlay"></div>
-                        <div class="card-content">
-                            <div>
-                                <h3 class="font-bold truncate text-backdrop">${'قسمت ' + chapter.chapter_number}</h3>
-                                <p class="text-xs mt-1 text-backdrop">${new Date(chapter.upload_date).toLocaleDateString('fa-IR')}</p>
-                            </div>
-
-                            <div class="status-btn ${statusClass} mt-3"> ${chapter.is_locked ? '<svg class="inline w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002 2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>' : ''}
-                                ${statusText}
-                            </div>
-                        </div>
-                    </a>
-                `;
-                return cardElement;
-            };
-
-            const renderChapters = (chapters) => {
-                if(chapters.length === 0 && currentPage === 1) {
-                    chapterListContainer.innerHTML = `<p class="text-zinc-400 text-center py-4 col-span-full">هنوز قسمتی برای این مجموعه اضافه نشده است.</p>`;
-                    loadMoreContainer.style.display = 'none';
-                    return;
-                }
-
+            } else {
                 chapters.forEach(chapter => {
-                    const card = createChapterCard(chapter);
-                    chapterListContainer.appendChild(card);
+                    const chapterElement = createChapterElement(chapter);
+                    chaptersContainer.appendChild(chapterElement);
                 });
 
-                const currentlyDisplayed = chapterListContainer.children.length;
-                if (currentlyDisplayed >= totalChapters) {
-                    loadMoreContainer.style.display = 'none';
+                if (chapters.length < 50) {
+                    hasMoreChapters = false;
+                    loadMoreContainer.classList.add('hidden');
                 } else {
-                    loadMoreContainer.style.display = 'block';
+                    loadMoreContainer.classList.remove('hidden');
                 }
-            };
-            
-            const loadMoreChapters = async () => {
-                if (isFetching) return;
-                isFetching = true;
-                currentPage++;
-                loadMoreBtn.textContent = 'در حال بارگذاری...';
-                loadMoreBtn.disabled = true;
-
-                try {
-                    const response = await fetch(`/api/manga/${mangaIdForChapters}/chapters?page=${currentPage}&sort=${sortOrder}`);
-                    const newChapters = await response.json();
-                    
-                    if (newChapters.length > 0) {
-                        renderChapters(newChapters);
-                    } else {
-                        loadMoreContainer.style.display = 'none';
-                    }
-                } catch (error) {
-                    console.error('Failed to load more chapters:', error);
-                    loadMoreBtn.textContent = 'خطا! تلاش مجدد';
-                } finally {
-                    isFetching = false;
-                    loadMoreBtn.disabled = false;
-                    if(loadMoreBtn.textContent === 'در حال بارگذاری...') {
-                       loadMoreBtn.textContent = 'بارگذاری بیشتر';
-                    }
-                }
-            };
-            
-            const resetAndFetchChapters = async () => {
-                currentPage = 1;
-                isFetching = true;
-                chapterListContainer.innerHTML = `<p class="text-zinc-400 text-center py-4 col-span-full">در حال بارگذاری لیست قسمت‌ها...</p>`;
-                loadMoreContainer.style.display = 'none';
-                
-                try {
-                    const response = await fetch(`/api/manga/${mangaIdForChapters}/chapters?page=${currentPage}&sort=${sortOrder}`);
-                    const chapters = await response.json();
-                    chapterListContainer.innerHTML = '';
-                    renderChapters(chapters);
-                } catch (error) {
-                    console.error('Failed to fetch chapters:', error);
-                    chapterListContainer.innerHTML = `<p class="text-red-400 text-center py-4 col-span-full">خطا در بارگذاری قسمت‌ها.</p>`;
-                } finally {
-                    isFetching = false;
-                }
-            };
-
-            loadMoreBtn.addEventListener('click', loadMoreChapters);
-
-            sortButton.addEventListener('click', () => {
-                if (isFetching) return;
-                sortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
-                sortOrderText.textContent = sortOrder === 'desc' ? 'جدیدترین' : 'قدیمی‌ترین';
-                sortIcon.style.transform = sortOrder === 'desc' ? 'rotate(0deg)' : 'rotate(180deg)';
-                resetAndFetchChapters();
-            });
-
-            if (totalChaptersCountEl) {
-                totalChaptersCountEl.textContent = totalChapters;
             }
-            renderChapters(initialChapters);
-        });
+        } catch (error) {
+            console.error('Error loading chapters:', error);
+            if (!append) {
+                chaptersContainer.innerHTML = '<div class="text-center py-8 text-red-400">خطا در بارگذاری قسمت‌ها.</div>';
+            }
+        } finally {
+            isLoading = false;
+            chaptersLoading.classList.add('hidden');
+            loadMoreBtn.disabled = false;
+            loadMoreBtn.textContent = 'بارگذاری بیشتر';
+        }
     }
+
+    // Event listeners
+    sortSelect.addEventListener('change', () => {
+        currentPage = 1;
+        hasMoreChapters = true;
+        loadChapters(1, false);
+    });
+
+    loadMoreBtn.addEventListener('click', () => {
+        if (hasMoreChapters && !isLoading) {
+            currentPage++;
+            loadChapters(currentPage, true);
+        }
+    });
+
+    // Initial load
+    loadChapters(1, false);
+});
 </script>

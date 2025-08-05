@@ -1,190 +1,206 @@
+
 <%- include('partials/header') %>
 
-<%
-    // EDITED: Helper function updated to the latest style
-    const getStatusInfo = (status) => {
-        switch (status) {
-            case 'Ongoing':   return { text: 'درحال پخش', classes: 'bg-green-900/50 text-green-300 border border-green-500/80' };
-            case 'Completed': return { text: 'پایان یافته', classes: 'bg-sky-900/50 text-sky-300 border border-sky-500/80' };
-            case 'Hiatus':    return { text: 'وقفه', classes: 'bg-yellow-900/50 text-yellow-300 border border-yellow-500/80' };
-            case 'Dropped':   return { text: 'رها شده', classes: 'bg-red-900/50 text-red-300 border border-red-500/80' };
-            case 'Upcoming':  return { text: 'به زودی', classes: 'bg-indigo-900/50 text-indigo-300 border border-indigo-500/80' };
-            default:          return { text: status || 'نامشخص', classes: 'bg-zinc-800 text-zinc-300 border border-zinc-600' };
-        }
-    };
-%>
-
 <div class="container mx-auto px-2 sm:px-4 py-8">
-    <h1 class="text-3xl font-bold text-sky-400 mb-8 text-center">📚 همه مانگاها</h1>
+    <!-- هدر صفحه -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-sky-400 mb-4">📚 کتابخانه مانگا</h1>
+        <p class="text-zinc-400 text-lg">مجموعه کاملی از بهترین مانگاها</p>
+    </div>
 
-    <form method="GET" action="/mangas" class="bg-zinc-800 p-4 sm:p-6 rounded-2xl shadow-md mb-8">
-        <div class="flex flex-col sm:flex-row gap-4 items-center">
-            <div class="relative w-full">
-                <span class="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                </span>
-                <input type="text" name="search" id="search" placeholder="جستجوی مانگا..." value="<%= currentFilters.search %>"
-                       class="w-full pl-3 pr-10 py-2.5 border border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 bg-zinc-700 text-zinc-100 placeholder-zinc-400">
+    <!-- بخش جست‌وجو و فیلترها -->
+    <div class="bg-zinc-800 rounded-xl p-6 mb-8 shadow-lg">
+        <form method="GET" action="/mangas" class="space-y-6">
+            <!-- جست‌وجو -->
+            <div class="relative">
+                <input type="text" name="search" value="<%= currentFilters.search %>" 
+                       placeholder="جست‌وجو در عنوان، نویسنده یا هنرمند..." 
+                       class="w-full bg-zinc-700 text-zinc-100 pl-12 pr-4 py-3 rounded-lg border border-zinc-600 focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
             </div>
-            <button type="button" id="toggle-advanced-filters" class="w-full sm:w-auto flex-shrink-0 flex items-center justify-center space-x-2 space-x-reverse px-4 py-2.5 bg-zinc-700 text-zinc-200 rounded-lg hover:bg-zinc-600 font-semibold transition-colors">
-                <svg id="filter-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L16 11.414V16a1 1 0 01-.293.707l-2 2A1 1 0 0113 18v-6.586L4.293 6.707A1 1 0 014 6V4z" /></svg>
-                <svg id="close-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                <span id="toggle-text">جستجوی پیشرفته</span>
-            </button>
-            <button type="submit" class="w-full sm:w-auto flex-shrink-0 bg-sky-500 text-white px-6 py-2.5 rounded-lg hover:bg-sky-600 font-semibold transition-colors">اعمال</button>
-        </div>
-        <div id="advanced-filters" class="transition-all duration-500 ease-in-out max-h-0 opacity-0 overflow-hidden">
-            <div class="pt-6 mt-6 border-t border-zinc-700">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-zinc-300 mb-1">وضعیت انتشار:</label>
-                        <select name="status" id="status" class="w-full px-3 py-2 border border-zinc-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-sky-500 bg-zinc-700 text-zinc-100">
-                            <option value="">همه</option>
-                            <option value="Ongoing" <%= currentFilters.status == 'Ongoing' ? 'selected' : '' %>>درحال انتشار</option>
-                            <option value="Completed" <%= currentFilters.status == 'Completed' ? 'selected' : '' %>>پایان یافته</option>
-                            <option value="Hiatus" <%= currentFilters.status == 'Hiatus' ? 'selected' : '' %>>وقفه</option>
-                            <option value="Dropped" <%= currentFilters.status == 'Dropped' ? 'selected' : '' %>>رها شده</option>
-                            <option value="Upcoming" <%= currentFilters.status == 'Upcoming' ? 'selected' : '' %>>به زودی</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="sort_by" class="block text-sm font-medium text-zinc-300 mb-1">مرتب‌سازی:</label>
-                        <select name="sort_by" id="sort_by" class="w-full px-3 py-2 border border-zinc-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-sky-500 bg-zinc-700 text-zinc-100">
-                            <option value="updated_at_desc" <%= currentFilters.sort_by == 'updated_at_desc' ? 'selected' : '' %>>آخرین به‌روزرسانی</option>
-                            <option value="created_at_desc" <%= currentFilters.sort_by == 'created_at_desc' ? 'selected' : '' %>>جدیدترین‌ها</option>
-                            <option value="title_asc" <%= currentFilters.sort_by == 'title_asc' ? 'selected' : '' %>>عنوان (صعودی)</option>
-                            <option value="view_count_desc" <%= currentFilters.sort_by == 'view_count_desc' ? 'selected' : '' %>>محبوب‌ترین</option>
-                        </select>
-                    </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- فیلتر وضعیت -->
+                <div>
+                    <label class="block text-sm font-medium text-zinc-300 mb-2">وضعیت انتشار</label>
+                    <select name="status" class="w-full bg-zinc-700 text-zinc-100 py-2 px-3 rounded-md border border-zinc-600 focus:ring-2 focus:ring-sky-500">
+                        <option value="">همه</option>
+                        <option value="ongoing" <%= currentFilters.status === 'ongoing' ? 'selected' : '' %>>در حال انتشار</option>
+                        <option value="completed" <%= currentFilters.status === 'completed' ? 'selected' : '' %>>تمام شده</option>
+                        <option value="hiatus" <%= currentFilters.status === 'hiatus' ? 'selected' : '' %>>متوقف شده</option>
+                    </select>
                 </div>
-                <% if (allGenres && allGenres.length > 0) { %>
-                <div class="mt-6">
-                    <label class="block text-sm font-medium text-zinc-300 mb-2">ژانرها:</label>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-2">
+
+                <!-- مرتب‌سازی -->
+                <div>
+                    <label class="block text-sm font-medium text-zinc-300 mb-2">مرتب‌سازی</label>
+                    <select name="sort_by" class="w-full bg-zinc-700 text-zinc-100 py-2 px-3 rounded-md border border-zinc-600 focus:ring-2 focus:ring-sky-500">
+                        <option value="updated_at_desc" <%= currentFilters.sort_by === 'updated_at_desc' ? 'selected' : '' %>>آخرین به‌روزرسانی</option>
+                        <option value="created_at_desc" <%= currentFilters.sort_by === 'created_at_desc' ? 'selected' : '' %>>جدیدترین</option>
+                        <option value="title_asc" <%= currentFilters.sort_by === 'title_asc' ? 'selected' : '' %>>بر اساس عنوان</option>
+                        <option value="view_count_desc" <%= currentFilters.sort_by === 'view_count_desc' ? 'selected' : '' %>>محبوب‌ترین</option>
+                    </select>
+                </div>
+
+                <!-- ژانرها -->
+                <div>
+                    <label class="block text-sm font-medium text-zinc-300 mb-2">ژانر</label>
+                    <select name="genres" multiple class="w-full bg-zinc-700 text-zinc-100 py-2 px-3 rounded-md border border-zinc-600 focus:ring-2 focus:ring-sky-500" size="1">
                         <% allGenres.forEach(genre => { %>
-                            <label class="flex items-center space-x-2 space-x-reverse text-sm text-zinc-200 hover:text-sky-300 cursor-pointer">
-                                <input type="checkbox" name="genres" value="<%= genre.id %>" 
-                                       <% if (currentFilters.genres.includes(String(genre.id))) { %>checked<% } %>
-                                       class="form-checkbox h-4 w-4 text-sky-500 bg-zinc-600 border-zinc-500 rounded focus:ring-sky-500 cursor-pointer">
-                                <span><%= genre.name %></span>
-                            </label>
+                            <option value="<%= genre.id %>" <%= currentFilters.genres && currentFilters.genres.includes(genre.id.toString()) ? 'selected' : '' %>>
+                                <%= genre.name %>
+                            </option>
                         <% }); %>
-                    </div>
+                    </select>
                 </div>
-                <% } %>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    جست‌وجو
+                </button>
+                <a href="/mangas" class="bg-zinc-600 hover:bg-zinc-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors text-center">
+                    پاک کردن فیلترها
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- نتایج -->
+    <% if (mangas && mangas.length > 0) { %>
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold text-zinc-300">
+                نتایج (<span class="text-sky-400"><%= mangas.length %></span> مانگا)
+            </h2>
+            <div class="text-sm text-zinc-400">
+                صفحه <%= currentPage %> از <%= totalPages %>
             </div>
         </div>
-    </form>
 
-    <% if (mangas && mangas.length > 0) { %>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 pt-3 pb-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             <% mangas.forEach(manga => { %>
-                <% const statusInfo = getStatusInfo(manga.status); %>
-                <% const statusTag = statusInfo ? `<span class="absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${statusInfo.classes.replace('border', '').replace(/border-[\w-]+/,'').trim()}">${statusInfo.text}</span>` : ''; %>
-                
-                <div class="group">
-                    <a href="/manga/<%= manga.id %>" class="block bg-zinc-800 rounded-lg shadow-lg overflow-hidden transition-transform duration-300 transform hover:-translate-y-1">
-                        <div class="relative aspect-[2/3] w-full">
+                <div class="bg-zinc-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl hover:shadow-sky-500/20 transition-all duration-300 group">
+                    <a href="/manga/<%= manga.id %>" class="block">
+                        <div class="aspect-[2/3] w-full overflow-hidden relative">
                             <img src="<%= manga.cover_image_url || 'https://placehold.co/300x450/27272a/e4e4e7?text=کاور' %>"
-                                 alt="[کاور <%= manga.title %>]"
-                                 class="w-full h-full object-cover" loading="lazy">
+                                 alt="[کاور <%= manga.title %>]" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                                 loading="lazy">
                             
-                            <%- statusTag %>
-
-                            <div class="absolute top-2 left-2 flex items-center gap-1 bg-black/50 text-white text-xs font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                <span><%= manga.view_count ? manga.view_count.toLocaleString('fa-IR') : '0' %></span>
+                            <!-- وضعیت -->
+                            <div class="absolute top-2 right-2">
+                                <span class="px-2 py-1 rounded-full text-xs font-semibold 
+                                    <%= manga.status === 'ongoing' ? 'bg-green-500/80 text-white' : 
+                                        manga.status === 'completed' ? 'bg-blue-500/80 text-white' : 
+                                        'bg-yellow-500/80 text-black' %>">
+                                    <%= manga.status === 'ongoing' ? 'ادامه‌دار' : 
+                                        manga.status === 'completed' ? 'تمام' : 
+                                        'توقف' %>
+                                </span>
                             </div>
 
-                            <div class="absolute bottom-2 right-2">
-                                <span class="bg-black/50 text-white text-xs font-semibold px-2.5 py-1 rounded-md backdrop-blur-sm"><%= manga.latest_chapter_number || '?' %> چپتر</span>
-                            </div>
+                            <!-- آخرین قسمت -->
+                            <% if (manga.latest_chapter_number) { %>
+                                <div class="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                                    قسمت <%= manga.latest_chapter_number %>
+                                </div>
+                            <% } %>
                         </div>
+                        
                         <div class="p-3">
-                            <h3 class="font-semibold text-zinc-100 truncate group-hover:text-sky-400 transition-colors" title="<%= manga.title %>"><%= manga.title %></h3>
-                            <p class="text-xs text-zinc-400 mt-2 text-center font-semibold"><%= manga.source_channel_name || 'نامشخص' %></p>
+                            <h3 class="text-sm font-semibold text-zinc-100 group-hover:text-sky-400 transition-colors line-clamp-2 mb-2" 
+                                title="<%= manga.title %>">
+                                <%= manga.title %>
+                            </h3>
+                            
+                            <% if (manga.source_channel_name) { %>
+                                <p class="text-xs text-zinc-400 truncate">
+                                    منبع: <%= manga.source_channel_name %>
+                                </p>
+                            <% } %>
+                            
+                            <div class="flex items-center justify-between mt-2 text-xs text-zinc-500">
+                                <span class="flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <%= (manga.view_count || 0).toLocaleString('fa-IR') %>
+                                </span>
+                            </div>
                         </div>
                     </a>
                 </div>
             <% }); %>
         </div>
+
+        <!-- صفحه‌بندی -->
+        <% if (totalPages > 1) { %>
+            <div class="mt-12 flex justify-center">
+                <nav class="flex items-center space-x-2 space-x-reverse">
+                    <% if (currentPage > 1) { %>
+                        <a href="/mangas?p=<%= currentPage - 1 %><%= Object.keys(currentFilters).map(key => currentFilters[key] ? `&${key}=${encodeURIComponent(currentFilters[key])}` : '').join('') %>" 
+                           class="px-4 py-2 bg-zinc-700 text-zinc-200 rounded-md hover:bg-zinc-600 transition-colors">
+                            &laquo; قبلی
+                        </a>
+                    <% } %>
+                    
+                    <% 
+                        let startPage = Math.max(1, currentPage - 2);
+                        let endPage = Math.min(totalPages, currentPage + 2);
+                        
+                        if (startPage > 1) { %>
+                            <a href="/mangas?p=1<%= Object.keys(currentFilters).map(key => currentFilters[key] ? `&${key}=${encodeURIComponent(currentFilters[key])}` : '').join('') %>" 
+                               class="px-4 py-2 bg-zinc-700 text-zinc-200 rounded-md hover:bg-zinc-600 transition-colors">1</a>
+                            <% if (startPage > 2) { %>
+                                <span class="px-2 text-zinc-500">...</span>
+                            <% } %>
+                        <% } %>
+                        
+                        <% for (let i = startPage; i <= endPage; i++) { %>
+                            <% if (i === currentPage) { %>
+                                <span class="px-4 py-2 bg-sky-500 text-white rounded-md font-semibold"><%= i %></span>
+                            <% } else { %>
+                                <a href="/mangas?p=<%= i %><%= Object.keys(currentFilters).map(key => currentFilters[key] ? `&${key}=${encodeURIComponent(currentFilters[key])}` : '').join('') %>" 
+                                   class="px-4 py-2 bg-zinc-700 text-zinc-200 rounded-md hover:bg-zinc-600 transition-colors"><%= i %></a>
+                            <% } %>
+                        <% } %>
+                        
+                        <% if (endPage < totalPages) { %>
+                            <% if (endPage < totalPages - 1) { %>
+                                <span class="px-2 text-zinc-500">...</span>
+                            <% } %>
+                            <a href="/mangas?p=<%= totalPages %><%= Object.keys(currentFilters).map(key => currentFilters[key] ? `&${key}=${encodeURIComponent(currentFilters[key])}` : '').join('') %>" 
+                               class="px-4 py-2 bg-zinc-700 text-zinc-200 rounded-md hover:bg-zinc-600 transition-colors"><%= totalPages %></a>
+                        <% } %>
+                    
+                    <% if (currentPage < totalPages) { %>
+                        <a href="/mangas?p=<%= currentPage + 1 %><%= Object.keys(currentFilters).map(key => currentFilters[key] ? `&${key}=${encodeURIComponent(currentFilters[key])}` : '').join('') %>" 
+                           class="px-4 py-2 bg-zinc-700 text-zinc-200 rounded-md hover:bg-zinc-600 transition-colors">
+                            بعدی &raquo;
+                        </a>
+                    <% } %>
+                </nav>
+            </div>
+        <% } %>
+
     <% } else { %>
-        <div class="text-center py-10">
-            <p class="text-zinc-400">هیچ مانگایی با فیلترهای اعمال شده یافت نشد.</p>
+        <div class="text-center py-16">
+            <svg class="w-24 h-24 text-zinc-600 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+            <h2 class="text-2xl font-bold text-zinc-400 mb-4">هیچ مانگایی یافت نشد</h2>
+            <p class="text-zinc-500 mb-6">متأسفانه با فیلترهای انتخابی شما هیچ نتیجه‌ای پیدا نشد.</p>
+            <a href="/mangas" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                مشاهده همه مانگاها
+            </a>
         </div>
     <% } %>
-
-    <% if (totalPages > 1) { %>
-        <div class="mt-8 flex justify-center items-center space-x-2 space-x-reverse">
-            <% if (currentPage > 1) { 
-                const prevParams = new URLSearchParams(Object.fromEntries(Object.entries(currentFilters).filter(([_, v]) => v != null && v !== '')));
-                prevParams.set('p', currentPage - 1);
-            %>
-                <a href="/mangas?<%= prevParams.toString() %>" class="px-4 py-2 bg-zinc-700 text-zinc-200 rounded-md hover:bg-zinc-600 transition-colors">&laquo; قبلی</a>
-            <% } %>
-            <% for (let i = 1; i <= totalPages; i++) { 
-                const pageParams = new URLSearchParams(Object.fromEntries(Object.entries(currentFilters).filter(([_, v]) => v != null && v !== '')));
-                pageParams.set('p', i);
-            %>
-                <% if (i === currentPage) { %>
-                    <span class="px-4 py-2 bg-sky-500 text-white rounded-md"><%= i %></span>
-                <% } else { %>
-                    <a href="/mangas?<%= pageParams.toString() %>" class="px-4 py-2 bg-zinc-700 text-zinc-200 rounded-md hover:bg-zinc-600 transition-colors"><%= i %></a>
-                <% } %>
-            <% } %>
-             <% if (currentPage < totalPages) { 
-                const nextParams = new URLSearchParams(Object.fromEntries(Object.entries(currentFilters).filter(([_, v]) => v != null && v !== '')));
-                nextParams.set('p', currentPage + 1);
-             %>
-                <a href="/mangas?<%= nextParams.toString() %>" class="px-4 py-2 bg-zinc-700 text-zinc-200 rounded-md hover:bg-zinc-600 transition-colors">بعدی &raquo;</a>
-            <% } %>
-        </div>
-    <% } %>
-
 </div>
-
-<script>
-// ... (Filter toggle javascript remains unchanged) ...
-document.addEventListener('DOMContentLoaded', function() {
-    const toggleBtn = document.getElementById('toggle-advanced-filters');
-    const advancedFiltersDiv = document.getElementById('advanced-filters');
-    const toggleText = document.getElementById('toggle-text');
-    const filterIcon = document.getElementById('filter-icon');
-    const closeIcon = document.getElementById('close-icon');
-
-    const areAdvancedFiltersActive = () => {
-        const status = document.getElementById('status').value;
-        const sortBy = document.getElementById('sort_by').value;
-        const checkedGenres = document.querySelectorAll('input[name="genres"]:checked').length;
-        // Check if any advanced filter is active (not default value)
-        return status !== '' || sortBy !== 'updated_at_desc' || checkedGenres > 0;
-    };
-
-    if (areAdvancedFiltersActive()) {
-        advancedFiltersDiv.style.maxHeight = advancedFiltersDiv.scrollHeight + 'px';
-        advancedFiltersDiv.classList.remove('opacity-0');
-        toggleText.textContent = 'بستن فیلترها';
-        filterIcon.classList.add('hidden');
-        closeIcon.classList.remove('hidden');
-    }
-
-    toggleBtn.addEventListener('click', () => {
-        const isHidden = advancedFiltersDiv.style.maxHeight === '0px' || advancedFiltersDiv.style.maxHeight === '';
-        if (isHidden) {
-            advancedFiltersDiv.style.maxHeight = advancedFiltersDiv.scrollHeight + 'px';
-            advancedFiltersDiv.classList.remove('opacity-0');
-            toggleText.textContent = 'بستن فیلترها';
-            filterIcon.classList.add('hidden');
-            closeIcon.classList.remove('hidden');
-        } else {
-            advancedFiltersDiv.style.maxHeight = '0px';
-            advancedFiltersDiv.classList.add('opacity-0');
-            toggleText.textContent = 'جستجوی پیشرفته';
-            filterIcon.classList.remove('hidden');
-            closeIcon.classList.add('hidden');
-        }
-    });
-});
-</script>
 
 <%- include('partials/footer') %>
