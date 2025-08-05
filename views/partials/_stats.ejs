@@ -30,3 +30,130 @@
         <p class="text-gray-400 font-medium text-sm">کانال</p>
     </div>
 </div>
+<div class="space-y-6">
+    <h2 class="text-2xl font-semibold text-sky-300 flex items-center gap-2">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+        </svg>
+        آمار و اطلاعات تکمیلی
+    </h2>
+
+    <!-- آمار کلی سایت -->
+    <div class="bg-zinc-900/50 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-sky-300 mb-4">آمار کلی سایت</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="text-center p-4 bg-zinc-800/50 rounded-lg">
+                <div class="text-2xl font-bold text-green-400" id="total-mangas">-</div>
+                <div class="text-sm text-zinc-400">کل مانگاها</div>
+            </div>
+            <div class="text-center p-4 bg-zinc-800/50 rounded-lg">
+                <div class="text-2xl font-bold text-blue-400" id="total-chapters">-</div>
+                <div class="text-sm text-zinc-400">کل قسمت‌ها</div>
+            </div>
+            <div class="text-center p-4 bg-zinc-800/50 rounded-lg">
+                <div class="text-2xl font-bold text-purple-400" id="total-users">-</div>
+                <div class="text-sm text-zinc-400">کاربران فعال</div>
+            </div>
+            <div class="text-center p-4 bg-zinc-800/50 rounded-lg">
+                <div class="text-2xl font-bold text-amber-400" id="total-channels">-</div>
+                <div class="text-sm text-zinc-400">کانال‌های ترجمه</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- محبوب‌ترین ژانرها -->
+    <div class="bg-zinc-900/50 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-sky-300 mb-4">محبوب‌ترین ژانرها</h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="popular-genres">
+            <!-- با JavaScript پر می‌شود -->
+        </div>
+    </div>
+
+    <!-- آمار فعالیت اخیر -->
+    <div class="bg-zinc-900/50 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-sky-300 mb-4">فعالیت‌های اخیر</h3>
+        <div class="space-y-3" id="recent-activities">
+            <!-- با JavaScript پر می‌شود -->
+        </div>
+    </div>
+
+    <!-- نمودار پیشرفت مطالعه (اگر کاربر لاگین باشد) -->
+    <% if (user) { %>
+    <div class="bg-zinc-900/50 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-sky-300 mb-4">پیشرفت مطالعه شما</h3>
+        <div class="space-y-4">
+            <div class="flex justify-between items-center">
+                <span class="text-zinc-300">مانگاهای در حال مطالعه:</span>
+                <span class="font-semibold text-zinc-100" id="user-reading-count">-</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-zinc-300">قسمت‌های خوانده شده:</span>
+                <span class="font-semibold text-zinc-100" id="user-chapters-read">-</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-zinc-300">مانگاهای علاقه‌مندی:</span>
+                <span class="font-semibold text-zinc-100" id="user-bookmarks-count">-</span>
+            </div>
+        </div>
+    </div>
+    <% } %>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        // بارگذاری آمار کلی
+        const response = await fetch('/api/site-stats');
+        const stats = await response.json();
+
+        if (stats.success) {
+            document.getElementById('total-mangas').textContent = (stats.data.totalMangas || 0).toLocaleString('fa-IR');
+            document.getElementById('total-chapters').textContent = (stats.data.totalChapters || 0).toLocaleString('fa-IR');
+            document.getElementById('total-users').textContent = (stats.data.totalUsers || 0).toLocaleString('fa-IR');
+            document.getElementById('total-channels').textContent = (stats.data.totalChannels || 0).toLocaleString('fa-IR');
+
+            // محبوب‌ترین ژانرها
+            const genresContainer = document.getElementById('popular-genres');
+            if (stats.data.popularGenres) {
+                stats.data.popularGenres.forEach(genre => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-sky-500/20 text-sky-300 px-3 py-2 rounded-lg text-center';
+                    div.innerHTML = `
+                        <div class="font-semibold">${genre.name}</div>
+                        <div class="text-xs text-sky-400">${genre.count} مانگا</div>
+                    `;
+                    genresContainer.appendChild(div);
+                });
+            }
+
+            // فعالیت‌های اخیر
+            const activitiesContainer = document.getElementById('recent-activities');
+            if (stats.data.recentActivities) {
+                stats.data.recentActivities.forEach(activity => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg';
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                            <span class="text-zinc-300">${activity.description}</span>
+                        </div>
+                        <span class="text-xs text-zinc-400">${new Date(activity.created_at).toLocaleDateString('fa-IR')}</span>
+                    `;
+                    activitiesContainer.appendChild(div);
+                });
+            }
+
+            <% if (user) { %>
+            // آمار کاربر (اگر لاگین باشد)
+            if (stats.data.userStats) {
+                document.getElementById('user-reading-count').textContent = (stats.data.userStats.readingCount || 0).toLocaleString('fa-IR');
+                document.getElementById('user-chapters-read').textContent = (stats.data.userStats.chaptersRead || 0).toLocaleString('fa-IR');
+                document.getElementById('user-bookmarks-count').textContent = (stats.data.userStats.bookmarksCount || 0).toLocaleString('fa-IR');
+            }
+            <% } %>
+        }
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+});
+</script>

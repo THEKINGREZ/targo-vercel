@@ -491,3 +491,276 @@
         });
     }
 </script>
+<div class="space-y-6">
+    <!-- هدر بخش کامنت‌ها -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 class="text-2xl font-semibold text-sky-300 flex items-center gap-2">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clip-rule="evenodd"/>
+            </svg>
+            نظرات و دیدگاه‌ها (<span id="comments-count">0</span>)
+        </h2>
+        <div class="flex items-center gap-3">
+            <label for="comments-sort" class="text-sm text-zinc-400">مرتب‌سازی:</label>
+            <select id="comments-sort" class="bg-zinc-700 text-zinc-200 text-sm rounded-md border-zinc-600 focus:ring-sky-500 focus:border-sky-500">
+                <option value="newest">جدیدترین ابتدا</option>
+                <option value="oldest">قدیمی‌ترین ابتدا</option>
+                <option value="most_liked">محبوب‌ترین ابتدا</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- فرم ارسال کامنت جدید -->
+    <% if (user) { %>
+        <div class="bg-zinc-900/50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-sky-300 mb-4">نظر خود را بیان کنید</h3>
+            <form id="comment-form" class="space-y-4">
+                <input type="hidden" id="parent-id" value="">
+                <div>
+                    <textarea id="comment-content" placeholder="نظر خود را اینجا بنویسید..." 
+                              class="w-full bg-zinc-700 text-zinc-100 p-4 rounded-lg border border-zinc-600 focus:ring-2 focus:ring-sky-500 focus:border-transparent resize-none"
+                              rows="4"></textarea>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-2 text-sm text-zinc-400">
+                            <input type="checkbox" id="is-spoiler" class="rounded border-zinc-600 bg-zinc-700 text-sky-500 focus:ring-sky-500">
+                            <span>حاوی اسپویلر</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button type="button" id="cancel-reply" class="hidden bg-zinc-600 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            لغو پاسخ
+                        </button>
+                        <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors">
+                            ارسال نظر
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    <% } else { %>
+        <div class="bg-zinc-800/50 border border-zinc-600 rounded-lg p-6 text-center">
+            <svg class="w-12 h-12 text-zinc-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            <h3 class="text-lg font-semibold text-zinc-300 mb-2">برای ارسال نظر وارد شوید</h3>
+            <p class="text-zinc-400 mb-4">برای شرکت در بحث و ارسال نظر، ابتدا وارد حساب کاربری خود شوید.</p>
+            <a href="/auth" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                ورود به حساب کاربری
+            </a>
+        </div>
+    <% } %>
+
+    <!-- لیست کامنت‌ها -->
+    <div id="comments-container" class="space-y-4">
+        <!-- کامنت‌ها با JavaScript بارگذاری می‌شوند -->
+    </div>
+
+    <!-- لودینگ -->
+    <div id="comments-loading" class="text-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-400 mx-auto"></div>
+        <p class="text-zinc-400 mt-2">در حال بارگذاری نظرات...</p>
+    </div>
+
+    <!-- پیام خالی بودن -->
+    <div id="comments-empty" class="hidden text-center py-12 bg-zinc-900/30 rounded-lg">
+        <svg class="w-16 h-16 text-zinc-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>
+        <h3 class="text-lg font-semibold text-zinc-400 mb-2">هنوز نظری ثبت نشده</h3>
+        <p class="text-zinc-500">اولین نفری باشید که نظر خود را در مورد این مانگا ارسال می‌کند!</p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mangaId = <%= manga.id %>;
+    const commentsContainer = document.getElementById('comments-container');
+    const commentsLoading = document.getElementById('comments-loading');
+    const commentsEmpty = document.getElementById('comments-empty');
+    const commentsCount = document.getElementById('comments-count');
+    const sortSelect = document.getElementById('comments-sort');
+    const commentForm = document.getElementById('comment-form');
+    const cancelReplyBtn = document.getElementById('cancel-reply');
+
+    let isLoadingComments = false;
+
+    // بارگذاری کامنت‌ها
+    async function loadComments() {
+        if (isLoadingComments) return;
+        isLoadingComments = true;
+
+        commentsLoading.classList.remove('hidden');
+        commentsEmpty.classList.add('hidden');
+
+        try {
+            const response = await fetch(`/api/manga/${mangaId}/comments?sort_by=${sortSelect.value}`);
+            const comments = await response.json();
+
+            commentsContainer.innerHTML = '';
+            
+            if (comments.length === 0) {
+                commentsEmpty.classList.remove('hidden');
+                commentsCount.textContent = '0';
+            } else {
+                comments.forEach(comment => renderComment(comment));
+                commentsCount.textContent = comments.length;
+            }
+        } catch (error) {
+            console.error('Error loading comments:', error);
+            commentsContainer.innerHTML = '<div class="text-center py-8 text-red-400">خطا در بارگذاری نظرات.</div>';
+        } finally {
+            isLoadingComments = false;
+            commentsLoading.classList.add('hidden');
+        }
+    }
+
+    // رندر کردن کامنت
+    function renderComment(comment, isReply = false) {
+        const div = document.createElement('div');
+        div.className = `bg-zinc-900/50 rounded-lg p-6 ${isReply ? 'mr-8 mt-4' : ''}`;
+        div.dataset.commentId = comment.id;
+
+        const spoilerClass = comment.is_spoiler ? 'blur-sm hover:blur-none cursor-pointer' : '';
+        const pinnedBadge = comment.is_pinned ? '<span class="bg-amber-500/20 text-amber-400 px-2 py-1 rounded-full text-xs font-medium">📌 سنجاق شده</span>' : '';
+
+        div.innerHTML = `
+            <div class="flex items-start space-x-4 space-x-reverse">
+                <img src="${comment.profile_image_url || `https://placehold.co/40x40/3f3f46/a1a1aa?text=${encodeURIComponent(comment.app_username.substring(0,1))}`}" 
+                     alt="${comment.app_username}" class="w-10 h-10 rounded-full object-cover border-2 border-zinc-700">
+                <div class="flex-grow min-w-0">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h4 class="font-semibold text-zinc-100">${comment.app_username}</h4>
+                        ${comment.is_owner ? '<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded-full text-xs font-medium">👑 مالک</span>' : ''}
+                        ${comment.is_admin ? '<span class="bg-purple-500/20 text-purple-400 px-2 py-1 rounded-full text-xs font-medium">🛡️ ادمین</span>' : ''}
+                        ${pinnedBadge}
+                        <span class="text-xs text-zinc-400">${new Date(comment.created_at).toLocaleDateString('fa-IR')}</span>
+                    </div>
+                    ${comment.is_spoiler ? '<div class="bg-amber-500/10 border border-amber-500/30 rounded-md p-2 mb-3 text-amber-200 text-sm">⚠️ این نظر حاوی اسپویلر است. برای مشاهده روی متن کلیک کنید.</div>' : ''}
+                    <div class="text-zinc-300 leading-relaxed mb-4 ${spoilerClass}">
+                        ${comment.content.replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            ${<% if (user) { %>`
+                                <button class="vote-btn flex items-center gap-1 text-sm ${comment.user_vote === 'like' ? 'text-green-400' : 'text-zinc-400 hover:text-green-400'} transition-colors" 
+                                        data-comment-id="${comment.id}" data-action="like">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"/>
+                                    </svg>
+                                    <span>${comment.likes || 0}</span>
+                                </button>
+                                <button class="vote-btn flex items-center gap-1 text-sm ${comment.user_vote === 'dislike' ? 'text-red-400' : 'text-zinc-400 hover:text-red-400'} transition-colors" 
+                                        data-comment-id="${comment.id}" data-action="dislike">
+                                    <svg class="w-4 h-4 transform rotate-180" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"/>
+                                    </svg>
+                                    <span>${comment.dislikes || 0}</span>
+                                </button>
+                                ${!isReply ? `<button class="reply-btn text-sm text-zinc-400 hover:text-sky-400 transition-colors" data-comment-id="${comment.id}" data-username="${comment.app_username}">پاسخ</button>` : ''}
+                            `<% } %> : `
+                                <span class="flex items-center gap-1 text-sm text-zinc-400">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"/>
+                                    </svg>
+                                    ${comment.likes || 0}
+                                </span>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        commentsContainer.appendChild(div);
+
+        // رندر کردن ریپلای‌ها
+        if (comment.replies && comment.replies.length > 0) {
+            comment.replies.forEach(reply => renderComment(reply, true));
+        }
+    }
+
+    // ارسال کامنت جدید
+    if (commentForm) {
+        commentForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const content = document.getElementById('comment-content').value.trim();
+            const parentId = document.getElementById('parent-id').value;
+            const isSpoiler = document.getElementById('is-spoiler').checked;
+
+            if (!content) return;
+
+            try {
+                const response = await fetch('/api/comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mangaId,
+                        parentId: parentId || null,
+                        content,
+                        isSpoiler
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('comment-content').value = '';
+                    document.getElementById('parent-id').value = '';
+                    document.getElementById('is-spoiler').checked = false;
+                    cancelReplyBtn.classList.add('hidden');
+                    loadComments();
+                }
+            } catch (error) {
+                console.error('Error posting comment:', error);
+            }
+        });
+
+        cancelReplyBtn.addEventListener('click', function() {
+            document.getElementById('parent-id').value = '';
+            document.getElementById('comment-content').placeholder = 'نظر خود را اینجا بنویسید...';
+            this.classList.add('hidden');
+        });
+    }
+
+    // Event delegation برای دکمه‌های vote و reply
+    commentsContainer.addEventListener('click', async function(e) {
+        if (e.target.closest('.vote-btn')) {
+            const btn = e.target.closest('.vote-btn');
+            const commentId = btn.dataset.commentId;
+            const action = btn.dataset.action;
+
+            try {
+                const response = await fetch('/api/comments/vote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ commentId, action })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    loadComments();
+                }
+            } catch (error) {
+                console.error('Error voting comment:', error);
+            }
+        } else if (e.target.closest('.reply-btn')) {
+            const btn = e.target.closest('.reply-btn');
+            const commentId = btn.dataset.commentId;
+            const username = btn.dataset.username;
+
+            document.getElementById('parent-id').value = commentId;
+            document.getElementById('comment-content').placeholder = `در پاسخ به ${username}...`;
+            document.getElementById('comment-content').focus();
+            cancelReplyBtn.classList.remove('hidden');
+        }
+    });
+
+    // تغییر مرتب‌سازی
+    sortSelect.addEventListener('change', loadComments);
+
+    // بارگذاری اولیه
+    loadComments();
+});
+</script>

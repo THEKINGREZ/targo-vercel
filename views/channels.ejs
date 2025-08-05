@@ -88,3 +88,151 @@
 </div>
 
 <%- include('partials/footer') %>
+<%- include('partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <!-- هدر صفحه -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-sky-400 mb-4">📢 کانال‌های ترجمه</h1>
+        <p class="text-zinc-400 text-lg">بهترین تیم‌های ترجمه مانگا</p>
+    </div>
+
+    <!-- بخش جست‌وجو و فیلترها -->
+    <div class="bg-zinc-800 rounded-xl p-6 mb-8 shadow-lg">
+        <form method="GET" action="/channels" class="space-y-6">
+            <!-- جست‌وجو -->
+            <div class="relative">
+                <input type="text" name="search" value="<%= typeof search !== 'undefined' ? search : '' %>" 
+                       placeholder="جست‌وجو در نام کانال، توضیحات یا هندل تلگرام..." 
+                       class="w-full bg-zinc-700 text-zinc-100 pl-12 pr-4 py-3 rounded-lg border border-zinc-600 focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- مرتب‌سازی -->
+                <div>
+                    <label class="block text-sm font-medium text-zinc-300 mb-2">مرتب‌سازی</label>
+                    <select name="sort_by" class="w-full bg-zinc-700 text-zinc-100 py-2 px-3 rounded-md border border-zinc-600 focus:ring-2 focus:ring-sky-500">
+                        <option value="name_asc" <%= typeof sort_by !== 'undefined' && sort_by === 'name_asc' ? 'selected' : '' %>>بر اساس نام (الف - ی)</option>
+                        <option value="manga_count_desc" <%= typeof sort_by !== 'undefined' && sort_by === 'manga_count_desc' ? 'selected' : '' %>>بیشترین مانگا</option>
+                        <option value="created_at_desc" <%= typeof sort_by !== 'undefined' && sort_by === 'created_at_desc' ? 'selected' : '' %>>جدیدترین</option>
+                    </select>
+                </div>
+
+                <!-- فیلتر وضعیت فعالیت -->
+                <div>
+                    <label class="block text-sm font-medium text-zinc-300 mb-2">وضعیت فعالیت</label>
+                    <select name="status" class="w-full bg-zinc-700 text-zinc-100 py-2 px-3 rounded-md border border-zinc-600 focus:ring-2 focus:ring-sky-500">
+                        <option value="">همه</option>
+                        <option value="active" <%= typeof status !== 'undefined' && status === 'active' ? 'selected' : '' %>>فعال</option>
+                        <option value="inactive" <%= typeof status !== 'undefined' && status === 'inactive' ? 'selected' : '' %>>غیرفعال</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    جست‌وجو
+                </button>
+                <a href="/channels" class="bg-zinc-600 hover:bg-zinc-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors text-center">
+                    پاک کردن فیلترها
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- نتایج -->
+    <% if (channels && channels.length > 0) { %>
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold text-zinc-300">
+                کانال‌ها (<span class="text-sky-400"><%= channels.length %></span> کانال)
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <% channels.forEach(channel => { %>
+                <div class="bg-zinc-800 rounded-lg p-6 hover:bg-zinc-700 transition-all duration-300 group shadow-lg hover:shadow-xl hover:shadow-sky-500/20">
+                    <div class="flex items-center mb-4">
+                        <img src="<%= channel.profile_image_url || `https://placehold.co/64x64/3f3f46/a1a1aa?text=${encodeURIComponent(channel.name.substring(0,1))}` %>" 
+                             alt="[پروفایل <%= channel.name %>]" 
+                             class="w-16 h-16 rounded-full object-cover border-2 border-zinc-600 group-hover:border-sky-500 transition-colors">
+                        <div class="mr-4 min-w-0 flex-grow">
+                            <h3 class="text-lg font-semibold text-zinc-100 group-hover:text-sky-400 transition-colors truncate">
+                                <%= channel.name %>
+                            </h3>
+                            <% if (channel.telegram_handle) { %>
+                                <p class="text-sm text-sky-400 truncate">@<%= channel.telegram_handle %></p>
+                            <% } %>
+                        </div>
+                    </div>
+                    
+                    <% if (channel.description) { %>
+                        <p class="text-zinc-300 text-sm mb-4 line-clamp-3">
+                            <%= channel.description %>
+                        </p>
+                    <% } %>
+                    
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-4 text-sm text-zinc-400">
+                            <span class="flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <%= channel.manga_count || 0 %> مانگا
+                            </span>
+                            <% if (channel.is_active) { %>
+                                <span class="flex items-center gap-1 text-green-400">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                    فعال
+                                </span>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <a href="/channel/<%= channel.id %>" 
+                           class="flex-grow bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-center">
+                            مشاهده کانال
+                        </a>
+                        <% if (channel.telegram_handle) { %>
+                            <a href="https://t.me/<%= channel.telegram_handle %>" target="_blank"
+                               class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg transition-colors">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 8.16l-1.61 7.515c-.119.553-.439.69-.888.429l-2.453-1.81-1.184 1.138c-.131.131-.242.242-.495.242l.177-2.517 4.589-4.147c.199-.177-.043-.275-.309-.098l-5.674 3.571-2.447-.765c-.531-.166-.542-.531.111-.785l9.563-3.687c.443-.166.831.099.691.785z"/>
+                                </svg>
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+
+    <% } else { %>
+        <div class="text-center py-16">
+            <svg class="w-24 h-24 text-zinc-600 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+            </svg>
+            <h2 class="text-2xl font-bold text-zinc-400 mb-4">هیچ کانالی یافت نشد</h2>
+            <p class="text-zinc-500 mb-6">متأسفانه با فیلترهای انتخابی شما هیچ نتیجه‌ای پیدا نشد.</p>
+            <a href="/channels" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                مشاهده همه کانال‌ها
+            </a>
+        </div>
+    <% } %>
+
+    <!-- بخش معرفی کانال‌های برتر -->
+    <section class="mt-16 py-12 bg-gradient-to-r from-sky-500/10 to-purple-500/10 rounded-xl">
+        <div class="text-center mb-8">
+            <h2 class="text-2xl font-bold text-sky-400 mb-4">🏆 کانال‌های برتر</h2>
+            <p class="text-zinc-400">کانال‌هایی که بیشترین مانگا را ترجمه کرده‌اند</p>
+        </div>
+        <!-- این بخش می‌تواند با JavaScript و API پر شود -->
+    </section>
+</div>
+
+<%- include('partials/footer') %>
