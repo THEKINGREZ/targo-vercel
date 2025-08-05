@@ -1,156 +1,312 @@
+
 <%- include('partials/header') %>
 
 <style>
-    /* A slightly lighter, more comfortable dark theme */
-    body {
-        background-color: #18181b; /* zinc-900 */
-        color: #e4e4e7; /* zinc-200 */
-        overflow-x: hidden; /* Prevents horizontal page stretching */
+    .gradient-bg {
+        background: linear-gradient(135deg, var(--primary-bg) 0%, #0f0f10 50%, var(--secondary-bg) 100%);
     }
 
-    /* Custom scrollbar for carousels */
-    .custom-scrollbar::-webkit-scrollbar { height: 8px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; } /* zinc-700 */
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #52525b; } /* zinc-600 */
+    .card {
+        background: var(--secondary-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
 
-    /* Hero Slider Styles */
-    .hero-slider-item {
-        transition: opacity 1s ease-in-out, visibility 1s;
-        visibility: hidden;
-        opacity: 0;
+    .card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        border-color: var(--accent-color);
+    }
+
+    .hero-section {
+        background: linear-gradient(135deg, var(--secondary-bg) 0%, var(--accent-bg) 100%);
+        border-radius: 24px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
         position: absolute;
-        inset: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        z-index: 1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 2rem;
+    }
+
+    .manga-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 2rem;
+        padding: 0 1rem;
+    }
+
+    .manga-card {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .manga-card:hover {
+        transform: scale(1.05);
+    }
+
+    .manga-image {
+        aspect-ratio: 2/3;
+        object-fit: cover;
+        width: 100%;
+        border-radius: 12px;
+    }
+
+    .stats-card {
+        background: linear-gradient(135deg, var(--secondary-bg), var(--accent-bg));
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+    }
+
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .floating-elements {
+        position: absolute;
         width: 100%;
         height: 100%;
-    }
-    .hero-slider-item.active {
-        visibility: visible;
-        opacity: 1;
-    }
-    .hero-gradient-overlay {
-        background: linear-gradient(to top, rgba(24, 24, 27, 1) 5%, rgba(24, 24, 27, 0.7) 40%, rgba(24, 24, 27, 0) 100%);
+        overflow: hidden;
+        pointer-events: none;
     }
 
-    /* Skeleton Animation */
-    @keyframes shimmer {
-        0% { background-position: -1200px 0; }
-        100% { background-position: 1200px 0; }
+    .floating-elements::before,
+    .floating-elements::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        background: linear-gradient(45deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        animation: float 6s ease-in-out infinite;
     }
-    .animate-shimmer {
-        animation: shimmer 1.5s infinite linear;
-        background: linear-gradient(to right, #27272a 4%, #3f3f46 25%, #27272a 36%);
-        background-size: 1200px 100%;
+
+    .floating-elements::before {
+        width: 100px;
+        height: 100px;
+        top: 20%;
+        right: 10%;
+        animation-delay: 0s;
+    }
+
+    .floating-elements::after {
+        width: 60px;
+        height: 60px;
+        bottom: 30%;
+        left: 15%;
+        animation-delay: 3s;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+
+    .shimmer {
+        background: linear-gradient(90deg, var(--secondary-bg) 25%, var(--accent-bg) 50%, var(--secondary-bg) 75%);
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite;
     }
 </style>
 
-<div class="container mx-auto space-y-12 sm:space-y-16 py-8">
+<div class="gradient-bg min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 py-12 space-y-16">
 
-    <section id="hero-section" class="relative h-[70vh] min-h-[500px] max-h-[600px] w-full bg-zinc-800 overflow-hidden rounded-2xl shadow-2xl">
-        <div id="hero-skeleton" class="absolute inset-0 animate-shimmer w-full h-full"></div>
-        <div id="hero-slider-container"></div>
-        <button id="slider-prev" class="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 bg-black/30 rounded-full hover:bg-black/50 transition-colors hidden sm:block">
-            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-        </button>
-        <button id="slider-next" class="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 bg-black/30 rounded-full hover:bg-black/50 transition-colors hidden sm:block">
-            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-        </button>
-    </section>
-     <section id="stats-section" class="px-2 sm:px-4">
-        <%- include('partials/_stats') %>
-    </section>
+        <!-- Hero Section -->
+        <section class="hero-section p-12 text-center relative">
+            <div class="floating-elements"></div>
+            <div class="hero-content">
+                <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                    <span class="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                        دنیای مانگا
+                    </span>
+                </h1>
+                <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+                    بهترین مجموعه مانگاهای ترجمه شده را در یک مکان کشف کنید
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="/mangas" class="btn-primary px-8 py-4 text-lg">
+                        مشاهده مانگاها
+                    </a>
+                    <a href="/channels" class="border border-gray-600 text-white px-8 py-4 rounded-xl hover:bg-gray-800 transition-colors">
+                        کانال‌های ترجمه
+                    </a>
+                </div>
+            </div>
+        </section>
 
-    <section class="space-y-5">
-        <div class="px-4 flex justify-between items-center">
-            <h2 class="text-2xl font-semibold text-green-400">🚀 آخرین بروزرسانی‌ها</h2>
-            <a href="/mangas?sort_by=updated_at_desc" class="text-sm text-sky-400 hover:text-sky-300 transition-colors">مشاهده همه &raquo;</a>
-        </div>
-        <div id="latest-updates-carousel" class="flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 px-4">
-            <% for (let i = 0; i < 8; i++) { %>
-                <div class="flex-shrink-0 w-40 sm:w-44"><div class="bg-zinc-800 rounded-lg animate-shimmer"><div class="aspect-[2/3] w-full bg-zinc-700 rounded-t-lg"></div><div class="p-3"><div class="h-4 bg-zinc-700 rounded w-full"></div><div class="h-3 bg-zinc-700 rounded w-2/3 mt-2"></div></div></div></div>
-            <% } %>
-        </div>
-    </section>
+        <!-- Stats Section -->
+        <section id="stats-section">
+            <%- include('partials/_stats') %>
+        </section>
 
-    <section class="space-y-5">
-        <div class="px-4 flex justify-between items-center">
-            <h2 class="text-2xl font-semibold text-sky-400">✨ جدیدترین‌ها</h2>
-            <a href="/mangas" class="text-sm text-sky-400 hover:text-sky-300 transition-colors">مشاهده همه &raquo;</a>
-        </div>
-        <div id="recent-mangas-carousel" class="flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 px-4">
-            <% for (let i = 0; i < 8; i++) { %>
-                <div class="flex-shrink-0 w-40 sm:w-44"><div class="bg-zinc-800 rounded-lg animate-shimmer"><div class="aspect-[2/3] w-full bg-zinc-700 rounded-t-lg"></div><div class="p-3"><div class="h-4 bg-zinc-700 rounded w-full"></div><div class="h-3 bg-zinc-700 rounded w-2/3 mt-2"></div></div></div></div>
-            <% } %>
-        </div>
-    </section>
+        <!-- Latest Updates -->
+        <section class="space-y-8">
+            <div class="flex justify-between items-center">
+                <h2 class="section-title">آخرین بروزرسانی‌ها</h2>
+                <a href="/mangas?sort_by=updated_at_desc" 
+                   class="text-indigo-400 hover:text-indigo-300 transition-colors font-medium">
+                    مشاهده همه →
+                </a>
+            </div>
+            <div id="latest-updates-carousel" class="manga-grid">
+                <!-- Skeleton loaders -->
+                <% for (let i = 0; i < 8; i++) { %>
+                    <div class="card p-0">
+                        <div class="shimmer aspect-[2/3] rounded-t-xl"></div>
+                        <div class="p-4">
+                            <div class="shimmer h-4 rounded mb-2"></div>
+                            <div class="shimmer h-3 rounded w-2/3"></div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </section>
 
-    <section class="space-y-5">
-        <div class="px-4 flex justify-between items-center">
-            <h2 class="text-2xl font-semibold text-amber-400">🔥 محبوب‌ترین‌ها</h2>
-            <a href="/mangas?sort_by=view_count_desc" class="text-sm text-sky-400 hover:text-sky-300 transition-colors">مشاهده همه &raquo;</a>
-        </div>
-        <div id="popular-mangas-carousel" class="flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 px-4">
-             <% for (let i = 0; i < 8; i++) { %>
-                <div class="flex-shrink-0 w-40 sm:w-44"><div class="bg-zinc-800 rounded-lg animate-shimmer"><div class="aspect-[2/3] w-full bg-zinc-700 rounded-t-lg"></div><div class="p-3"><div class="h-4 bg-zinc-700 rounded w-full"></div><div class="h-3 bg-zinc-700 rounded w-2/3 mt-2"></div></div></div></div>
-            <% } %>
-        </div>
-    </section>
+        <!-- Recent Mangas -->
+        <section class="space-y-8">
+            <div class="flex justify-between items-center">
+                <h2 class="section-title">جدیدترین‌ها</h2>
+                <a href="/mangas" 
+                   class="text-indigo-400 hover:text-indigo-300 transition-colors font-medium">
+                    مشاهده همه →
+                </a>
+            </div>
+            <div id="recent-mangas-carousel" class="manga-grid">
+                <!-- Skeleton loaders -->
+                <% for (let i = 0; i < 8; i++) { %>
+                    <div class="card p-0">
+                        <div class="shimmer aspect-[2/3] rounded-t-xl"></div>
+                        <div class="p-4">
+                            <div class="shimmer h-4 rounded mb-2"></div>
+                            <div class="shimmer h-3 rounded w-2/3"></div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </section>
 
-    <section class="space-y-5">
-        <div class="px-4 flex justify-between items-center">
-            <h2 class="text-2xl font-semibold text-sky-400">📢 کانال‌های برتر</h2>
-            <a href="/channels" class="text-sm text-sky-400 hover:text-sky-300 transition-colors">مشاهده همه &raquo;</a>
-        </div>
-        <div id="suggested-channels-carousel" class="flex gap-5 overflow-x-auto custom-scrollbar pt-3 pb-4 px-4">
-            <% for (let i = 0; i < 8; i++) { %>
-                <div class="flex-shrink-0 w-40 sm:w-44"><div class="animate-shimmer rounded-lg"><div class="aspect-[4/5] w-full"></div></div></div>
-            <% } %>
-        </div>
-    </section>
+        <!-- Popular Mangas -->
+        <section class="space-y-8">
+            <div class="flex justify-between items-center">
+                <h2 class="section-title">محبوب‌ترین‌ها</h2>
+                <a href="/mangas?sort_by=view_count_desc" 
+                   class="text-indigo-400 hover:text-indigo-300 transition-colors font-medium">
+                    مشاهده همه →
+                </a>
+            </div>
+            <div id="popular-mangas-carousel" class="manga-grid">
+                <!-- Skeleton loaders -->
+                <% for (let i = 0; i < 8; i++) { %>
+                    <div class="card p-0">
+                        <div class="shimmer aspect-[2/3] rounded-t-xl"></div>
+                        <div class="p-4">
+                            <div class="shimmer h-4 rounded mb-2"></div>
+                            <div class="shimmer h-3 rounded w-2/3"></div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </section>
+
+    </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-
+    
     function getStatusInfo(status) {
-        // این تابع وضعیت انتشار را به همراه استایل کامل تگ آن برمی‌گرداند
         switch (status) {
-            case 'Ongoing':   return { text: 'درحال پخش', classes: 'bg-green-900/50 text-green-300 border border-green-500/80' };
-            case 'Completed': return { text: 'پایان یافته', classes: 'bg-sky-900/50 text-sky-300 border border-sky-500/80' };
-            case 'Hiatus':    return { text: 'وقفه', classes: 'bg-yellow-900/50 text-yellow-300 border border-yellow-500/80' };
-            case 'Dropped':   return { text: 'رها شده', classes: 'bg-red-900/50 text-red-300 border border-red-500/80' };
-            case 'Upcoming':  return { text: 'به زودی', classes: 'bg-indigo-900/50 text-indigo-300 border border-indigo-500/80' };
-            default:          return { text: status || 'نامشخص', classes: 'bg-zinc-800 text-zinc-300 border border-zinc-600' };
+            case 'Ongoing': return { text: 'درحال پخش', classes: 'bg-green-500/20 text-green-300 border border-green-500/50' };
+            case 'Completed': return { text: 'پایان یافته', classes: 'bg-blue-500/20 text-blue-300 border border-blue-500/50' };
+            case 'Hiatus': return { text: 'وقفه', classes: 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/50' };
+            case 'Dropped': return { text: 'رها شده', classes: 'bg-red-500/20 text-red-300 border border-red-500/50' };
+            case 'Upcoming': return { text: 'به زودی', classes: 'bg-purple-500/20 text-purple-300 border border-purple-500/50' };
+            default: return { text: status || 'نامشخص', classes: 'bg-gray-500/20 text-gray-300 border border-gray-500/50' };
         }
     }
 
     function createMangaCard(manga) {
-        // --- EDITED: This function now places view count on top-left ---
         const statusInfo = getStatusInfo(manga.status);
-        const statusTag = statusInfo ? `<span class="absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${statusInfo.classes.replace('border', '').replace(/border-[\w-]+/,'').trim()}">${statusInfo.text}</span>` : '';
         
         return `
-            <div class="flex-shrink-0 w-40 sm:w-44 group">
-                <a href="/manga/${manga.id}" class="block bg-zinc-800 rounded-lg shadow-lg overflow-hidden transition-transform duration-300 transform hover:-translate-y-1">
-                    <div class="relative aspect-[2/3] w-full">
-                        <img src="${manga.cover_image_url || 'https://placehold.co/300x450/27272a/e4e4e7?text=کاور'}"
-                             alt="[کاور ${manga.title}]"
-                             class="w-full h-full object-cover" loading="lazy">
+            <div class="manga-card card p-0 group">
+                <a href="/manga/${manga.id}" class="block">
+                    <div class="relative">
+                        <img src="${manga.cover_image_url || 'https://placehold.co/300x450/1a1a1d/6366f1?text=کاور'}"
+                             alt="${manga.title}"
+                             class="manga-image">
                         
-                        ${statusTag}
-
-                        <div class="absolute top-2 left-2 flex items-center gap-1 bg-black/50 text-white text-xs font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                            <span>${manga.view_count ? manga.view_count.toLocaleString('fa-IR') : '0'}</span>
+                        <div class="absolute top-3 right-3">
+                            <span class="text-xs px-2 py-1 rounded-lg font-medium ${statusInfo.classes}">
+                                ${statusInfo.text}
+                            </span>
                         </div>
 
-                        <div class="absolute bottom-2 right-2">
-                            <span class="bg-black/50 text-white text-xs font-semibold px-2.5 py-1 rounded-md backdrop-blur-sm">${manga.latest_chapter_number || '?'} چپتر</span>
+                        <div class="absolute top-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg">
+                            👁 ${manga.view_count ? manga.view_count.toLocaleString('fa-IR') : '0'}
+                        </div>
+
+                        <div class="absolute bottom-3 right-3 bg-indigo-500/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg font-medium">
+                            ${manga.latest_chapter_number || '?'} چپتر
                         </div>
                     </div>
-                    <div class="p-3">
-                        <h3 class="font-semibold text-zinc-100 truncate group-hover:text-sky-400 transition-colors" title="${manga.title}">${manga.title}</h3>
-                        <p class="text-xs text-zinc-400 mt-2 text-center font-semibold">${manga.source_channel_name || 'نامشخص'}</p>
+                    
+                    <div class="p-4">
+                        <h3 class="font-semibold text-white mb-2 group-hover:text-indigo-400 transition-colors line-clamp-2">
+                            ${manga.title}
+                        </h3>
+                        <p class="text-sm text-gray-400">
+                            ${manga.source_channel_name || 'نامشخص'}
+                        </p>
                     </div>
                 </a>
             </div>
@@ -159,17 +315,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function createChannelCard(channel) {
         return `
-            <div class="flex-shrink-0 w-40 sm:w-44 group">
-                <a href="/channel/${channel.id}" class="block text-center bg-zinc-800 p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                    <div class="aspect-square w-24 mx-auto overflow-hidden rounded-full bg-zinc-700 p-1">
-                         <img src="${channel.profile_image_url || 'https://placehold.co/128x128/3f3f46/a1a1aa?text=' + encodeURIComponent(channel.name.substring(0,1))}"
-                              alt="[پروفایل ${channel.name}]"
-                              class="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300">
+            <div class="card p-6 text-center group hover-lift">
+                <a href="/channel/${channel.id}" class="block">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 overflow-hidden">
+                        <img src="${channel.profile_image_url || 'https://placehold.co/64x64/6366f1/ffffff?text=' + encodeURIComponent(channel.name.substring(0,1))}"
+                             alt="${channel.name}"
+                             class="w-full h-full object-cover">
                     </div>
-                    <div class="pt-3">
-                        <h3 class="font-semibold text-zinc-100 truncate group-hover:text-sky-400 transition-colors" title="${channel.name}">${channel.name}</h3>
-                        <p class="text-xs text-zinc-400 mt-1">${channel.manga_count || 0} اثر</p>
-                    </div>
+                    <h3 class="font-semibold text-white mb-2 group-hover:text-indigo-400 transition-colors">
+                        ${channel.name}
+                    </h3>
+                    <p class="text-sm text-gray-400">
+                        ${channel.manga_count || 0} اثر
+                    </p>
                 </a>
             </div>
         `;
@@ -177,95 +335,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function populateCarousel(carouselElement, items, cardCreatorFunction) {
         if (!carouselElement || !items || items.length === 0) {
-            if(carouselElement) carouselElement.innerHTML = '<p class="text-zinc-400 px-4">موردی برای نمایش یافت نشد.</p>';
+            if(carouselElement) carouselElement.innerHTML = '<p class="text-gray-400 text-center col-span-full py-12">موردی برای نمایش یافت نشد.</p>';
             return;
         }
         carouselElement.innerHTML = items.map(cardCreatorFunction).join('');
-    }
-
-    // --- Hero Slider Logic ---
-    const heroSection = document.getElementById('hero-section');
-    const sliderContainer = document.getElementById('hero-slider-container');
-    const prevBtn = document.getElementById('slider-prev');
-    const nextBtn = document.getElementById('slider-next');
-    let sliderItems = [], currentIndex = 0, sliderInterval, touchStartX = 0, touchEndX = 0;
-
-    function createHeroSlide(manga, index) {
-        const statusInfo = getStatusInfo(manga.status);
-        const genresHTML = (manga.genres || []).slice(0, 3).map(g => `<span class="text-xs font-semibold px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full">${g.name}</span>`).join('');
-
-        return `
-            <div class="hero-slider-item ${index === 0 ? 'active' : ''}">
-                <img src="${manga.banner_image_url || manga.cover_image_url}" class="absolute inset-0 w-full h-full object-cover object-center" alt="بنر ${manga.title}">
-                <div class="hero-gradient-overlay absolute inset-0"></div>
-
-                <div class="relative z-20 flex flex-col justify-end h-full max-w-7xl mx-auto p-4 sm:p-6 md:p-10">
-                    
-                    <div class="w-full md:hidden">
-                        <div class="bg-black/60 backdrop-blur-xl rounded-2xl p-4 shadow-2xl">
-                            
-                            <div class="flex items-center justify-between gap-4">
-                                <div class="flex-grow min-w-0">
-                                    <h2 class="text-lg font-bold text-white truncate">${manga.title}</h2>
-                                    <div class="flex items-center gap-x-3 gap-y-1 text-xs text-zinc-300 mt-1.5 flex-wrap">
-                                        <span class="px-2 py-0.5 text-[10px] font-semibold rounded-md ${statusInfo.classes}">${statusInfo.text}</span>
-                                        <span class="flex items-center gap-1.5 bg-white/10 px-2 py-0.5 rounded-md">
-                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                                            ${manga.latest_chapter_number || '?'} چپتر
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="flex-shrink-0">
-                                    <img src="${manga.source_channel_profile_url || 'https://placehold.co/64x64/3f3f46/a1a1aa?text=?'}" class="w-12 h-12 rounded-full object-cover border-2 border-zinc-700">
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-2 mt-4">
-                                <a href="<%= READER_BASE_URL %>/chapter/${manga.first_chapter_id}?manga_id=${manga.id}" class="flex-grow text-center px-4 py-2 rounded-md font-bold bg-sky-500 hover:bg-sky-600 transition-colors text-sm shadow-lg">شروع خواندن</a>
-                                <a href="/manga/${manga.id}" class="flex-shrink-0 p-2 rounded-md font-bold bg-zinc-700/80 hover:bg-zinc-600/80 transition-colors" title="اطلاعات بیشتر">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="w-full hidden md:flex items-end gap-6">
-                        <div class="flex-grow min-w-0 text-white">
-                            <h2 class="text-4xl font-bold">${manga.title}</h2>
-                            <div class="flex flex-wrap gap-2 my-4">${genresHTML}</div>
-                            <div class="text-sm text-zinc-300 my-4 space-y-1">
-                                <p><strong>آخرین چپتر:</strong> ${manga.latest_chapter_number || '?'}</p>
-                                <p><strong>تیم ترجمه:</strong> ${manga.source_channel_name || 'نامشخص'}</p>
-                                <p><strong>وضعیت:</strong> ${statusInfo.text}</p>
-                            </div>
-                        </div>
-                        <div class="w-56 flex-shrink-0">
-                             <a href="/manga/${manga.id}">
-                                 <img src="${manga.cover_image_url}" class="rounded-lg shadow-2xl aspect-[2/3] object-cover" alt="کاور ${manga.title}">
-                             </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    function showSlide(index) {
-        sliderItems.forEach((item, i) => item.classList.toggle('active', i === index));
-        currentIndex = index;
-    }
-
-    function nextSlide() { showSlide((currentIndex + 1) % (sliderItems.length || 1)); }
-    function prevSlide() { showSlide((currentIndex - 1 + (sliderItems.length || 1)) % (sliderItems.length || 1)); }
-    function startSlider() { stopSlider(); sliderInterval = setInterval(nextSlide, 6000); }
-    function stopSlider() { clearInterval(sliderInterval); }
-    function handleTouchStart(e) { touchStartX = e.changedTouches[0].screenX; }
-    function handleTouchEnd(e) {
-        const swipeDistance = e.changedTouches[0].screenX - touchStartX;
-        if (Math.abs(swipeDistance) > 50) {
-            if (swipeDistance > 0) { prevSlide(); } else { nextSlide(); }
-            startSlider();
-        }
     }
 
     function animateCount(elementId, finalValue) {
@@ -273,8 +346,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!element) return;
         
         let startValue = 0;
-        const duration = 1500; // ۱.۵ ثانیه
-        // محاسبه گام زمانی برای رسیدن به عدد نهایی در زمان مشخص
+        const duration = 2000;
         const stepTime = Math.max(1, Math.floor(duration / finalValue));
         
         const timer = setInterval(() => {
@@ -286,7 +358,8 @@ document.addEventListener('DOMContentLoaded', function() {
             element.textContent = startValue.toLocaleString('fa-IR');
         }, stepTime);
     }
-    // Fetch all homepage data
+
+    // Fetch homepage data
     fetch('/api/home-data')
         .then(response => {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -297,38 +370,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 populateCarousel(document.getElementById('recent-mangas-carousel'), data.recentMangas, createMangaCard);
                 populateCarousel(document.getElementById('popular-mangas-carousel'), data.popularMangas, createMangaCard);
                 populateCarousel(document.getElementById('latest-updates-carousel'), data.latestUpdates, createMangaCard);
-                populateCarousel(document.getElementById('suggested-channels-carousel'), data.suggestedChannels, createChannelCard);
 
-                const featuredMangas = data.popularMangas.slice(0, 5);
-                if (featuredMangas.length > 0) {
-                    document.getElementById('hero-skeleton').classList.add('hidden');
-                    sliderContainer.innerHTML = featuredMangas.map(createHeroSlide).join('');
-                    sliderItems = document.querySelectorAll('.hero-slider-item');
-                    prevBtn.addEventListener('click', () => { prevSlide(); startSlider(); });
-                    nextBtn.addEventListener('click', () => { nextSlide(); startSlider(); });
-                    heroSection.addEventListener('mouseenter', stopSlider);
-                    heroSection.addEventListener('mouseleave', startSlider);
-                    heroSection.addEventListener('touchstart', handleTouchStart, { passive: true });
-                    heroSection.addEventListener('touchend', handleTouchEnd, { passive: true });
-                    startSlider();
-                    if (data.siteStats) {
+                if (data.siteStats) {
                     animateCount('stats-manga-count', data.siteStats.mangaCount);
                     animateCount('stats-chapter-count', data.siteStats.chapterCount);
                     animateCount('stats-channel-count', data.siteStats.channelCount);
-                    }
-                } else {
-                    document.getElementById('hero-section').classList.add('hidden');
                 }
-            } else { throw new Error(data.message || 'Failed to load data.'); }
+            } else {
+                throw new Error(data.message || 'Failed to load data.');
+            }
         })
         .catch(error => {
             console.error('Error fetching homepage data:', error);
-            const errorMsg = '<p class="text-red-400 text-center w-full p-10">خطا در بارگذاری اطلاعات.</p>';
-            document.getElementById('hero-section').innerHTML = errorMsg;
-            document.getElementById('latest-updates-carousel').innerHTML = errorMsg;
-            document.getElementById('recent-mangas-carousel').innerHTML = errorMsg;
-            document.getElementById('popular-mangas-carousel').innerHTML = errorMsg;
-            document.getElementById('suggested-channels-carousel').innerHTML = errorMsg;
+            const errorMsg = '<p class="text-red-400 text-center col-span-full py-12">خطا در بارگذاری اطلاعات.</p>';
+            ['latest-updates-carousel', 'recent-mangas-carousel', 'popular-mangas-carousel'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.innerHTML = errorMsg;
+            });
         });
 });
 </script>
