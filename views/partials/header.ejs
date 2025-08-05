@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -6,41 +7,133 @@
     <title><%- pageTitle %> - کتابخانه مانگا</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans+Arabic&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-bg: #0a0a0b;
+            --secondary-bg: #1a1a1d;
+            --accent-bg: #2d2d30;
+            --text-primary: #ffffff;
+            --text-secondary: #b4b4b8;
+            --accent-color: #6366f1;
+            --accent-hover: #5855eb;
+            --border-color: #2d2d30;
+        }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-bg) transparent;
+        }
+
+        *::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background: var(--accent-bg);
+            border-radius: 3px;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background: var(--border-color);
+        }
+
         body {
-            background-color: #18181b; /* zinc-900 */
-            color: #e4e4e7; /* zinc-200 */
-            font-family: 'Playpen Sans Arabic', sans-serif;
+            background: linear-gradient(135deg, var(--primary-bg) 0%, #0f0f10 100%);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
         }
-        .header-rounded-box {
-            background-color: #27272a; /* zinc-800 */
-            border-radius: 1.5rem;
-            padding: 1rem 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+        .glass-effect {
+            background: rgba(26, 26, 29, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .playpen-sans-arabic {
-            font-family: 'Playpen Sans Arabic', sans-serif;
+
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        #mobile-menu {
-            background-color: #27272a;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
-            margin-top: 0.75rem;
-            margin-left: auto;
-            margin-right: auto;
-            max-width: 90%;
-            padding: 1rem;
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
         }
-        #mobile-menu a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0.5rem;
-            padding: 0.625rem 1rem;
-            margin-bottom: 0.5rem;
+
+        .nav-link {
+            position: relative;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-hover));
+            transition: width 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-link:hover::before {
             width: 100%;
-            transition: background-color 200ms ease-in-out, color 200ms ease-in-out;
+        }
+
+        .search-input {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 0.875rem 1.25rem;
+            color: var(--text-primary);
+            font-weight: 400;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            border: none;
+            border-radius: 12px;
+            padding: 0.875rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .mobile-menu {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+        }
+
+        .logo-text {
+            background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 2rem;
         }
     </style>
 </head>
@@ -49,108 +142,103 @@
 <div class="main-container min-h-screen flex flex-col">
 
 <header class="sticky top-0 z-50">
-    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-center h-24">
-            <div class="header-rounded-box flex items-center justify-between w-full md:max-w-7xl mx-auto bg-zinc-800/80 backdrop-blur-md">
+    <nav class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="flex items-center justify-between h-20">
+            
+            <!-- Logo -->
+            <div class="flex-shrink-0">
+                <a href="/" class="logo-text hover:scale-105 transition-transform duration-300">
+                    تارگو
+                </a>
+            </div>
 
-                <!-- Right Section: Nav links (Desktop) / Hamburger (Mobile) -->
-                <div class="flex-1 flex justify-start">
-                    <!-- Desktop Nav -->
-                    <div class="hidden md:flex items-baseline space-x-4 space-x-reverse">
-                        <a href="/" class="text-white bg-zinc-700 hover:bg-sky-600 px-4 py-2.5 rounded-lg text-sm font-medium inline-flex items-center justify-center transition-colors duration-200">صفحه اصلی</a>
-                        <a href="/mangas" class="text-white bg-zinc-700 hover:bg-sky-600 px-4 py-2.5 rounded-lg text-sm font-medium inline-flex items-center justify-center transition-colors duration-200">همه مانگاها</a>
-                        <a href="/channels" class="text-white bg-zinc-700 hover:bg-sky-600 px-4 py-2.5 rounded-lg text-sm font-medium inline-flex items-center justify-center transition-colors duration-200">کانال‌ها</a>
-                    </div>
-                    <!-- Mobile Hamburger Button -->
-                    <div class="flex md:hidden">
-                        <button type="button" id="mobile-menu-button" class="bg-zinc-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-800 focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
-                            <span class="sr-only">باز کردن منوی اصلی</span>
-                            <svg class="block h-6 w-6" id="menu-open-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                            <svg class="hidden h-6 w-6" id="menu-close-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
-                    </div>
-                </div>
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center space-x-1 space-x-reverse">
+                <a href="/" class="nav-link text-white relative">صفحه اصلی</a>
+                <a href="/mangas" class="nav-link text-white relative">مانگاها</a>
+                <a href="/channels" class="nav-link text-white relative">کانال‌ها</a>
+            </div>
 
-                <!-- Center Section: Site Name -->
-                <div class="flex-shrink-0 mx-4">
-                    <a href="/" class="flex-shrink-0 flex items-center space-x-2 space-x-reverse">
-                        <span class="text-white font-bold text-3xl hover:text-sky-300 transition-colors playpen-sans-arabic">
-                            تارگو
-                        </span>
-                    </a>
-                </div>
+            <!-- Search & User Section -->
+            <div class="hidden md:flex items-center space-x-4 space-x-reverse">
+                <form action="/mangas" method="GET" class="flex items-center space-x-3 space-x-reverse">
+                    <input type="search" name="search" placeholder="جستجو..." 
+                           class="search-input w-64" 
+                           value="<%= typeof query !== 'undefined' ? query : '' %>">
+                    <button type="submit" class="btn-primary p-3">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
+                </form>
 
-                <!-- Left Section: Search and User actions -->
-                <div class="flex-1 flex justify-end relative z-10">
-                    <!-- Desktop Search & User Actions -->
-                    <div class="hidden md:flex items-center space-x-4 space-x-reverse">
-                        <form action="/mangas" method="GET" class="flex items-center space-x-2 space-x-reverse">
-                            <input type="search" name="search" placeholder="جستجوی مانگا..." class="p-2 rounded-md bg-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200" value="<%= typeof query !== 'undefined' ? query : '' %>">
-                            <button type="submit" class="bg-sky-500 text-white p-2 rounded-md hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-zinc-800 transition-colors duration-200">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                            </button>
-                        </form>
-
-                        <div class="flex items-center space-x-4 space-x-reverse ml-4">
-                            <% if (user) { %>
-                                <a href="/account" class="flex items-center gap-2 text-sm font-medium text-zinc-200 hover:text-white transition-colors">
-                                    <% if (user.profile_image_url) { %>
-                                        <img src="<%= user.profile_image_url %>" alt="آواتار" class="w-8 h-8 rounded-full object-cover border-2 border-zinc-600">
-                                    <% } else { %>
-                                        <div class="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                                        </div>
-                                    <% } %>
-                                    <span><%= user.app_username %></span>
-                                </a>
-                                <a href="/logout" class="text-white bg-red-600 hover:bg-red-700 px-4 py-2.5 rounded-lg text-sm font-medium inline-flex items-center justify-center transition-colors duration-200">خروج</a>
-                            <% } else { %>
-                                <a href="/login" class="bg-sky-500 text-white hover:bg-sky-600 px-4 py-2.5 rounded-lg text-sm font-medium inline-flex items-center justify-center transition-colors duration-200">ورود</a>
-                            <% } %>
-                        </div>
-                    </div>
-                    <!-- Mobile User Actions -->
-                    <div class="flex items-center md:hidden">
-                        <% if (user) { %>
-                            <a href="/account" class="w-10 h-10 rounded-full flex items-center justify-center bg-zinc-700 overflow-hidden focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-zinc-800">
-                                <% if (user.profile_image_url) { %>
-                                    <img src="<%= user.profile_image_url %>" alt="آواتار" class="w-full h-full object-cover">
-                                <% } else { %>
-                                    <span class="sr-only">حساب کاربری</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                <% } %>
-                            </a>
+                <% if (user) { %>
+                    <a href="/account" class="flex items-center gap-3 hover-lift p-2 rounded-xl">
+                        <% if (user.profile_image_url) { %>
+                            <img src="<%= user.profile_image_url %>" alt="آواتار" class="w-10 h-10 rounded-full object-cover">
                         <% } else { %>
-                            <a href="/login" class="bg-sky-500 text-white hover:bg-sky-600 px-4 py-2.5 rounded-lg text-sm font-medium inline-flex items-center justify-center transition-colors duration-200">ورود</a>
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
                         <% } %>
-                    </div>
-                </div>
+                        <span class="text-sm font-medium"><%= user.app_username %></span>
+                    </a>
+                    <a href="/logout" class="text-red-400 hover:text-red-300 p-2 rounded-xl transition-colors">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    </a>
+                <% } else { %>
+                    <a href="/login" class="btn-primary">ورود</a>
+                <% } %>
+            </div>
 
+            <!-- Mobile Menu Button -->
+            <div class="flex md:hidden">
+                <button type="button" id="mobile-menu-button" class="p-3 rounded-xl bg-gray-800/50 text-gray-300 hover:text-white hover:bg-gray-700/50 transition-colors">
+                    <svg class="w-6 h-6" id="menu-open-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg class="w-6 h-6 hidden" id="menu-close-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
         </div>
     </nav>
 
-    <!-- Mobile Menu, shown on toggle -->
-    <div class="md:hidden hidden" id="mobile-menu">
-        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <form action="/mangas" method="GET" class="flex items-center space-x-2 space-x-reverse w-full mb-3">
-                <input type="search" name="search" placeholder="جستجوی مانگا..." class="flex-1 min-w-0 p-2.5 rounded-lg bg-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200" value="<%= typeof query !== 'undefined' ? query : '' %>">
-                <button type="submit" class="flex-shrink-0 bg-sky-500 text-white p-2 rounded-lg hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-zinc-800 transition-colors duration-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+    <!-- Mobile Menu -->
+    <div class="md:hidden hidden mobile-menu mx-4 mt-2 p-6" id="mobile-menu">
+        <form action="/mangas" method="GET" class="mb-6">
+            <div class="flex gap-3">
+                <input type="search" name="search" placeholder="جستجو..." 
+                       class="search-input flex-1" 
+                       value="<%= typeof query !== 'undefined' ? query : '' %>">
+                <button type="submit" class="btn-primary p-3">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
                 </button>
-            </form>
-            <a href="/" class="text-white bg-zinc-700 hover:bg-sky-600 block font-medium">صفحه اصلی</a>
-            <a href="/mangas" class="text-white bg-zinc-700 hover:bg-sky-600 block font-medium">همه مانگاها</a>
-            <a href="/channels" class="text-white bg-zinc-700 hover:bg-sky-600 block font-medium">کانال‌ها</a>
+            </div>
+        </form>
+        
+        <div class="space-y-2">
+            <a href="/" class="nav-link block text-white">صفحه اصلی</a>
+            <a href="/mangas" class="nav-link block text-white">مانگاها</a>
+            <a href="/channels" class="nav-link block text-white">کانال‌ها</a>
+            <% if (user) { %>
+                <a href="/account" class="nav-link block text-white">حساب کاربری</a>
+                <a href="/logout" class="nav-link block text-red-400">خروج</a>
+            <% } else { %>
+                <a href="/login" class="nav-link block text-white">ورود</a>
+            <% } %>
         </div>
     </div>
 </header>
 
 <main class="flex-grow">
-    
-<!-- The rest of your page content goes here -->
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -163,11 +251,7 @@ document.addEventListener('DOMContentLoaded', function () {
         menuButton.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
             openIcon.classList.toggle('hidden');
-            openIcon.classList.toggle('block');
             closeIcon.classList.toggle('hidden');
-            closeIcon.classList.toggle('block');
-            const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
-            menuButton.setAttribute('aria-expanded', !isExpanded);
         });
     }
 });
